@@ -22,6 +22,24 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Increment version
+      id: version
+      run: |
+        $versionCode = $env:GITHUB_RUN_NUMBER
+        $versionName = "1.0.$versionCode"
+        echo "VERSION_CODE=$versionCode" >> $env:GITHUB_OUTPUT
+        echo "VERSION_NAME=$versionName" >> $env:GITHUB_OUTPUT
+        echo "Building version $versionName ($versionCode)"
+      shell: pwsh
+
+    - name: Update project version
+      run: |
+        $csproj = Get-Content $env:PROJECT_PATH -Raw
+        $csproj = $csproj -replace '<ApplicationDisplayVersion>[^<]*</ApplicationDisplayVersion>', "<ApplicationDisplayVersion>${{ steps.version.outputs.VERSION_NAME }}</ApplicationDisplayVersion>"
+        $csproj = $csproj -replace '<ApplicationVersion>[^<]*</ApplicationVersion>', "<ApplicationVersion>${{ steps.version.outputs.VERSION_CODE }}</ApplicationVersion>"
+        Set-Content $env:PROJECT_PATH -Value $csproj
+      shell: pwsh
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -35,16 +53,6 @@ jobs:
       with:
         distribution: 'microsoft'
         java-version: '17'
-
-    - name: Increment version
-      id: version
-      run: |
-        $versionCode = $env:GITHUB_RUN_NUMBER
-        $versionName = "1.0.$versionCode"
-        echo "VERSION_CODE=$versionCode" >> $env:GITHUB_OUTPUT
-        echo "VERSION_NAME=$versionName" >> $env:GITHUB_OUTPUT
-        echo "Building version $versionName ($versionCode)"
-      shell: pwsh
 
     - name: Update AndroidManifest.xml
       run: |
@@ -63,7 +71,7 @@ jobs:
         [IO.File]::WriteAllBytes("${{ github.workspace }}/schoolmanagement.keystore", $bytes)
       shell: pwsh
 
-    - name: Build Android APK (Signed)
+    - name: Build Android APK (Signed) - v${{ steps.version.outputs.VERSION_NAME }}
       run: |
         dotnet publish ${{ env.PROJECT_PATH }} `
           -f net9.0-android `
@@ -71,12 +79,10 @@ jobs:
           /p:AndroidSigningKeyStore=schoolmanagement.keystore `
           /p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }} `
           /p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }} `
-          /p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }} `
-          /p:ApplicationVersion=${{ steps.version.outputs.VERSION_CODE }} `
-          /p:ApplicationDisplayVersion=${{ steps.version.outputs.VERSION_NAME }}
+          /p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       shell: pwsh
 
-    - name: Build Android AAB (Signed)
+    - name: Build Android AAB (Signed) - v${{ steps.version.outputs.VERSION_NAME }}
       run: |
         dotnet publish ${{ env.PROJECT_PATH }} `
           -f net9.0-android `
@@ -85,9 +91,7 @@ jobs:
           /p:AndroidSigningKeyStore=schoolmanagement.keystore `
           /p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }} `
           /p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }} `
-          /p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }} `
-          /p:ApplicationVersion=${{ steps.version.outputs.VERSION_CODE }} `
-          /p:ApplicationDisplayVersion=${{ steps.version.outputs.VERSION_NAME }}
+          /p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       shell: pwsh
 
     - name: Find APK and AAB files
