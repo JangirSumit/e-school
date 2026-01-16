@@ -1,19 +1,34 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
              x:Class="SchoolManagement.Views.StudentsPage"
-             Title="Students">
-    <Grid RowDefinitions="Auto,*">
-        <Button Grid.Row="0" Text="Add Student" Command="{Binding AddStudentCommand}" Margin="10"/>
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Students}">
+             Title="Students"
+             BackgroundColor="{StaticResource Gray100}">
+    <Grid RowDefinitions="Auto,*" Padding="10">
+        <Button Grid.Row="0" Text="Add Student" Command="{Binding AddStudentCommand}" 
+                HeightRequest="50" CornerRadius="25" Margin="10">
+            <Button.ImageSource>
+                <FontImageSource FontFamily="MaterialRegular" Glyph="{x:Static m:MaterialRegular.Add}" Size="24" Color="White"/>
+            </Button.ImageSource>
+        </Button>
+        
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Students}" Margin="10,0">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Margin="10,5" Padding="10">
-                        <VerticalStackLayout>
-                            <Label Text="{Binding RollNumber}" FontAttributes="Bold"/>
-                            <Label Text="{Binding Class}"/>
-                            <Label Text="{Binding Section}"/>
-                        </VerticalStackLayout>
+                    <Frame Margin="0,5" Padding="15" HasShadow="True" CornerRadius="15" BackgroundColor="White">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
+                            <Image Grid.Column="0" 
+                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static m:MaterialOutlined.Account_circle}, Size=50, Color={StaticResource Primary}}" 
+                                   HeightRequest="50" WidthRequest="50" VerticalOptions="Center"/>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="5">
+                                <Label Text="{Binding RollNumber}" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource Gray900}"/>
+                                <HorizontalStackLayout Spacing="10">
+                                    <Label Text="{Binding Class, StringFormat='Class: {0}'}" FontSize="14" TextColor="{StaticResource Gray600}"/>
+                                    <Label Text="{Binding Section, StringFormat='Section: {0}'}" FontSize="14" TextColor="{StaticResource Gray600}"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Grid>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
