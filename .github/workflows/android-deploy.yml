@@ -1,0 +1,128 @@
+name: Android Build and Deploy
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  PROJECT_PATH: 'SchoolManagement/SchoolManagement.csproj'
+  ANDROID_MANIFEST: 'SchoolManagement/Platforms/Android/AndroidManifest.xml'
+
+jobs:
+  build-android:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Install .NET MAUI workload
+      run: dotnet workload install maui
+
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'microsoft'
+        java-version: '17'
+
+    - name: Increment version
+      id: version
+      run: |
+        $versionCode = $env:GITHUB_RUN_NUMBER
+        $versionName = "1.0.$versionCode"
+        echo "VERSION_CODE=$versionCode" >> $env:GITHUB_OUTPUT
+        echo "VERSION_NAME=$versionName" >> $env:GITHUB_OUTPUT
+        echo "Building version $versionName ($versionCode)"
+      shell: pwsh
+
+    - name: Update AndroidManifest.xml
+      run: |
+        $manifest = Get-Content $env:ANDROID_MANIFEST -Raw
+        $manifest = $manifest -replace 'android:versionCode="\d+"', "android:versionCode=`"${{ steps.version.outputs.VERSION_CODE }}`""
+        $manifest = $manifest -replace 'android:versionName="[^"]*"', "android:versionName=`"${{ steps.version.outputs.VERSION_NAME }}`""
+        Set-Content $env:ANDROID_MANIFEST -Value $manifest
+      shell: pwsh
+
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.PROJECT_PATH }}
+
+    - name: Decode keystore
+      run: |
+        $bytes = [Convert]::FromBase64String("${{ secrets.ANDROID_KEYSTORE_BASE64 }}")
+        [IO.File]::WriteAllBytes("${{ github.workspace }}/schoolmanagement.keystore", $bytes)
+      shell: pwsh
+
+    - name: Build Android APK (Signed)
+      run: |
+        dotnet publish ${{ env.PROJECT_PATH }} `
+          -f net9.0-android `
+          -c Release `
+          /p:AndroidSigningKeyStore=schoolmanagement.keystore `
+          /p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }} `
+          /p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }} `
+          /p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }} `
+          /p:ApplicationVersion=${{ steps.version.outputs.VERSION_CODE }} `
+          /p:ApplicationDisplayVersion=${{ steps.version.outputs.VERSION_NAME }}
+      shell: pwsh
+
+    - name: Build Android AAB (Signed)
+      run: |
+        dotnet publish ${{ env.PROJECT_PATH }} `
+          -f net9.0-android `
+          -c Release `
+          /p:AndroidPackageFormat=aab `
+          /p:AndroidSigningKeyStore=schoolmanagement.keystore `
+          /p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }} `
+          /p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }} `
+          /p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }} `
+          /p:ApplicationVersion=${{ steps.version.outputs.VERSION_CODE }} `
+          /p:ApplicationDisplayVersion=${{ steps.version.outputs.VERSION_NAME }}
+      shell: pwsh
+
+    - name: Find APK and AAB files
+      id: find-files
+      run: |
+        $apk = Get-ChildItem -Path "SchoolManagement/bin/Release/net9.0-android/publish" -Filter "*-Signed.apk" -Recurse | Select-Object -First 1
+        $aab = Get-ChildItem -Path "SchoolManagement/bin/Release/net9.0-android/publish" -Filter "*-Signed.aab" -Recurse | Select-Object -First 1
+        echo "APK_PATH=$($apk.FullName)" >> $env:GITHUB_OUTPUT
+        echo "AAB_PATH=$($aab.FullName)" >> $env:GITHUB_OUTPUT
+      shell: pwsh
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-apk-v${{ steps.version.outputs.VERSION_NAME }}
+        path: ${{ steps.find-files.outputs.APK_PATH }}
+        retention-days: 30
+
+    - name: Upload AAB artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-aab-v${{ steps.version.outputs.VERSION_NAME }}
+        path: ${{ steps.find-files.outputs.AAB_PATH }}
+        retention-days: 30
+
+    - name: Create Release
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ steps.version.outputs.VERSION_NAME }}
+        name: Release v${{ steps.version.outputs.VERSION_NAME }}
+        draft: false
+        prerelease: false
+        files: |
+          ${{ steps.find-files.outputs.APK_PATH }}
+          ${{ steps.find-files.outputs.AAB_PATH }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
