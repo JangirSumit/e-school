@@ -99,20 +99,27 @@ jobs:
       run: |
         $apk = Get-ChildItem -Path "SchoolManagement/bin/Release/net9.0-android/publish" -Filter "*-Signed.apk" -Recurse | Select-Object -First 1
         $aab = Get-ChildItem -Path "SchoolManagement/bin/Release/net9.0-android/publish" -Filter "*-Signed.aab" -Recurse | Select-Object -First 1
-        echo "APK_PATH=$($apk.FullName)" >> $env:GITHUB_OUTPUT
-        echo "AAB_PATH=$($aab.FullName)" >> $env:GITHUB_OUTPUT
+        
+        $newApk = "SchoolManagement/bin/Release/net9.0-android/publish/eSchool-v${{ steps.version.outputs.VERSION_NAME }}.apk"
+        $newAab = "SchoolManagement/bin/Release/net9.0-android/publish/eSchool-v${{ steps.version.outputs.VERSION_NAME }}.aab"
+        
+        Copy-Item $apk.FullName -Destination $newApk
+        Copy-Item $aab.FullName -Destination $newAab
+        
+        echo "APK_PATH=$newApk" >> $env:GITHUB_OUTPUT
+        echo "AAB_PATH=$newAab" >> $env:GITHUB_OUTPUT
       shell: pwsh
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
-        name: android-apk-v${{ steps.version.outputs.VERSION_NAME }}
+        name: eSchool-apk-v${{ steps.version.outputs.VERSION_NAME }}
         path: ${{ steps.find-files.outputs.APK_PATH }}
         retention-days: 30
 
     - name: Upload AAB artifact
       uses: actions/upload-artifact@v4
       with:
-        name: android-aab-v${{ steps.version.outputs.VERSION_NAME }}
+        name: eSchool-aab-v${{ steps.version.outputs.VERSION_NAME }}
         path: ${{ steps.find-files.outputs.AAB_PATH }}
         retention-days: 30

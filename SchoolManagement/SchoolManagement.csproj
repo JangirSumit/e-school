@@ -21,10 +21,10 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>SchoolManagement</ApplicationTitle>
+		<ApplicationTitle>eSchool</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.schoolmanagement</ApplicationId>
+		<ApplicationId>com.eschool.app</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
