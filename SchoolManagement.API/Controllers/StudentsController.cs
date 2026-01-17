@@ -28,6 +28,7 @@ public class StudentsController : ControllerBase
                 s.Id,
                 s.RollNumber,
                 s.User.FullName,
+                s.User.Username ?? "",
                 s.User.Email,
                 s.Class,
                 s.Section,
@@ -52,6 +53,7 @@ public class StudentsController : ControllerBase
             student.Id,
             student.RollNumber,
             student.User.FullName,
+            student.User.Username ?? "",
             student.User.Email,
             student.Class,
             student.Section,
@@ -64,13 +66,14 @@ public class StudentsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<StudentResponse>> Create(CreateStudentRequest request)
     {
-        if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-            return BadRequest(new { message = "Email already exists" });
+        if (await _context.Users.AnyAsync(u => u.TenantId == TenantId && u.Username == request.Username))
+            return BadRequest(new { message = "Username already exists in this school" });
 
         var user = new User
         {
             TenantId = TenantId,
-            Email = request.Email,
+            Username = request.Username,
+            Email = request.Email ?? "",
             FullName = request.FullName,
             Phone = request.Phone,
             Role = UserRole.Student,
@@ -99,6 +102,7 @@ public class StudentsController : ControllerBase
             student.Id,
             student.RollNumber,
             user.FullName,
+            user.Username,
             user.Email,
             student.Class,
             student.Section,

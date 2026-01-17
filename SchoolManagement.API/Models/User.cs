@@ -4,6 +4,7 @@ public class User
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string TenantId { get; set; } = string.Empty;
+    public string? Username { get; set; } // For staff/students: unique per tenant
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;

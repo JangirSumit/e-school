@@ -53,15 +53,45 @@ public class ApiService : IApiService
 
     public async Task<LoginResponse?> LoginAsync(LoginRequest request)
     {
-        var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request);
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<LoginResponse>(_jsonOptions);
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request);
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+            return await response.Content.ReadFromJsonAsync<LoginResponse>(_jsonOptions);
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new Exception($"Connection failed: {ex.Message}");
+        }
+        catch (TaskCanceledException)
+        {
+            throw new Exception("Request timeout. Please check if API is running.");
+        }
     }
 
     public async Task<SignupResponse?> SignupAsync(SignupRequest request)
     {
-        var response = await _httpClient.PostAsJsonAsync("/api/auth/signup", request);
-        return await response.Content.ReadFromJsonAsync<SignupResponse>(_jsonOptions);
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync("/api/auth/signup", request);
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                return new SignupResponse(false, $"Server error: {response.StatusCode}");
+            }
+            return await response.Content.ReadFromJsonAsync<SignupResponse>(_jsonOptions);
+        }
+        catch (HttpRequestException ex)
+        {
+            return new SignupResponse(false, $"Connection failed: {ex.Message}");
+        }
+        catch (TaskCanceledException)
+        {
+            return new SignupResponse(false, "Request timeout. Please check if API is running.");
+        }
     }
 
     public async Task<List<StudentResponse>> GetStudentsAsync()

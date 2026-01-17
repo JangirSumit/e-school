@@ -26,7 +26,31 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+        User? user = null;
+        
+        // Check if login is schoolcode@username format
+        if (request.Email.Contains('@') && !request.Email.Contains('.'))
+        {
+            var parts = request.Email.Split('@');
+            if (parts.Length == 2)
+            {
+                var schoolCode = parts[0].ToUpper();
+                var username = parts[1];
+                
+                var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.SchoolCode == schoolCode);
+                if (tenant != null)
+                {
+                    user = await _context.Users.FirstOrDefaultAsync(u => 
+                        u.TenantId == tenant.Id && u.Username == username);
+                }
+            }
+        }
+        else
+        {
+            // Admin login with email
+            user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email && u.Role == UserRole.Admin);
+        }
+        
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             return Unauthorized(new { message = "Invalid credentials" });
 
@@ -40,8 +64,19 @@ public class AuthController : ControllerBase
         if (await _context.Users.AnyAsync(u => u.Email == request.Email))
             return BadRequest(new SignupResponse(false, "Email already exists"));
 
+        // Generate school code from school name (first 3-4 letters, uppercase)
+        var schoolCode = GenerateSchoolCode(request.SchoolName);
+        
+        // Ensure uniqueness
+        var existingCode = await _context.Tenants.FirstOrDefaultAsync(t => t.SchoolCode == schoolCode);
+        if (existingCode != null)
+        {
+            schoolCode = schoolCode + new Random().Next(10, 99);
+        }
+
         var tenant = new Tenant
         {
+            SchoolCode = schoolCode,
             SchoolName = request.SchoolName,
             Email = request.Email,
             Phone = request.Phone,
@@ -67,7 +102,18 @@ public class AuthController : ControllerBase
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        return Ok(new SignupResponse(true, "School registered successfully"));
+        return Ok(new SignupResponse(true, $"School registered successfully. School Code: {schoolCode}"));
+    }
+
+    private string GenerateSchoolCode(string schoolName)
+    {
+        var words = schoolName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length >= 2)
+        {
+            return (words[0].Substring(0, Math.Min(2, words[0].Length)) + 
+                   words[1].Substring(0, Math.Min(2, words[1].Length))).ToUpper();
+        }
+        return schoolName.Substring(0, Math.Min(4, schoolName.Length)).ToUpper();
     }
 
     private string GenerateJwtToken(User user)

@@ -12,6 +12,15 @@ if %errorlevel% neq 0 (
 )
 
 echo.
+echo [1.5/3] Applying database migrations...
+dotnet ef database update
+if %errorlevel% neq 0 (
+    echo Migration failed!
+    pause
+    exit /b %errorlevel%
+)
+
+echo.
 echo [2/3] Building Windows App...
 cd ..\SchoolManagement
 dotnet build -f net9.0-windows10.0.19041.0 -c Debug

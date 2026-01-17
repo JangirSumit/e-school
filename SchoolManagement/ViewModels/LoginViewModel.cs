@@ -1,5 +1,6 @@
 using System.Windows.Input;
 using SchoolManagement.Services;
+using System.Text.RegularExpressions;
 
 namespace SchoolManagement.ViewModels;
 
@@ -27,7 +28,7 @@ public class LoginViewModel : BaseViewModel
     public LoginViewModel(IAuthService authService)
     {
         _authService = authService;
-        LoginCommand = new Command(async () => await LoginAsync());
+        LoginCommand = new Command(async () => await LoginAsync(), () => !IsBusy);
         SignupCommand = new Command(async () => await NavigateToSignupAsync());
     }
 
@@ -41,16 +42,26 @@ public class LoginViewModel : BaseViewModel
         }
 
         IsBusy = true;
-        var result = await _authService.LoginAsync(Email, Password);
-        IsBusy = false;
+        try
+        {
+            var result = await _authService.LoginAsync(Email, Password);
 
-        if (result.Success)
-        {
-            await Shell.Current.GoToAsync("//DashboardPage");
+            if (result.Success)
+            {
+                await Shell.Current.GoToAsync("//DashboardPage");
+            }
+            else
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", result.Message, "OK");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            await Application.Current.MainPage.DisplayAlert("Error", result.Message, "OK");
+            await Application.Current.MainPage.DisplayAlert("Error", $"Login failed: {ex.Message}", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 

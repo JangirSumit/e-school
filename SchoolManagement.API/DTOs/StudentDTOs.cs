@@ -1,8 +1,9 @@
 namespace SchoolManagement.API.DTOs;
 
 public record CreateStudentRequest(
+    string Username, // Required: unique username for login
     string FullName,
-    string Email,
+    string? Email, // Optional for students
     string Phone,
     string RollNumber,
     string Class,
@@ -17,7 +18,8 @@ public record StudentResponse(
     string Id,
     string RollNumber,
     string FullName,
-    string Email,
+    string Username,
+    string? Email,
     string Class,
     string Section,
     DateTime DateOfBirth,

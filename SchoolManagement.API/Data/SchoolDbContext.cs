@@ -18,7 +18,11 @@ public class SchoolDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Tenant>().HasKey(t => t.Id);
+        modelBuilder.Entity<Tenant>().HasIndex(t => t.SchoolCode).IsUnique();
+        
         modelBuilder.Entity<User>().HasKey(u => u.Id);
+        modelBuilder.Entity<User>().HasIndex(u => new { u.TenantId, u.Username }).IsUnique();
+        modelBuilder.Entity<User>().HasIndex(u => u.Email);
         modelBuilder.Entity<Student>().HasKey(s => s.Id);
         modelBuilder.Entity<Faculty>().HasKey(f => f.Id);
         modelBuilder.Entity<Attendance>().HasKey(a => a.Id);

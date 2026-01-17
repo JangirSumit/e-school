@@ -1,6 +1,7 @@
 using System.Windows.Input;
 using SchoolManagement.Models;
 using SchoolManagement.Services;
+using System.Text.RegularExpressions;
 
 namespace SchoolManagement.ViewModels;
 
@@ -26,32 +27,86 @@ public class SignupViewModel : BaseViewModel
     public SignupViewModel(IAuthService authService)
     {
         _authService = authService;
-        SignupCommand = new Command(async () => await SignupAsync());
+        SignupCommand = new Command(async () => await SignupAsync(), () => !IsBusy);
     }
 
     [Obsolete]
     private async Task SignupAsync()
     {
-        if (string.IsNullOrWhiteSpace(SchoolName) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+        if (string.IsNullOrWhiteSpace(SchoolName))
         {
-            await Application.Current.MainPage.DisplayAlert("Error", "Please fill all required fields", "OK");
+            await Application.Current.MainPage.DisplayAlert("Error", "School name is required", "OK");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Email))
+        {
+            await Application.Current.MainPage.DisplayAlert("Error", "Email is required", "OK");
+            return;
+        }
+
+        if (!IsValidEmail(Email))
+        {
+            await Application.Current.MainPage.DisplayAlert("Error", "Please enter a valid email address", "OK");
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(Phone) && Phone.Length < 10)
+        {
+            await Application.Current.MainPage.DisplayAlert("Error", "Phone number must be at least 10 digits", "OK");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Password))
+        {
+            await Application.Current.MainPage.DisplayAlert("Error", "Password is required", "OK");
+            return;
+        }
+
+        if (Password.Length < 6)
+        {
+            await Application.Current.MainPage.DisplayAlert("Error", "Password must be at least 6 characters", "OK");
             return;
         }
 
         IsBusy = true;
-        var tenant = new Tenant { SchoolName = SchoolName, Email = Email, Phone = Phone, Address = Address };
-        var admin = new User { Email = Email, FullName = AdminName, Phone = Phone };
-        var result = await _authService.SignupSchoolAsync(tenant, admin, Password);
-        IsBusy = false;
+        try
+        {
+            var tenant = new Tenant { SchoolName = SchoolName, Email = Email, Phone = Phone, Address = Address };
+            var admin = new User { Email = Email, FullName = AdminName, Phone = Phone };
+            var result = await _authService.SignupSchoolAsync(tenant, admin, Password);
 
-        if (result.Success)
-        {
-            await Application.Current.MainPage.DisplayAlert("Success", result.Message, "OK");
-            await Shell.Current.GoToAsync("..");
+            if (result.Success)
+            {
+                await Application.Current.MainPage.DisplayAlert("Success", result.Message, "OK");
+                await Shell.Current.GoToAsync("..");
+            }
+            else
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", result.Message, "OK");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            await Application.Current.MainPage.DisplayAlert("Error", result.Message, "OK");
+            await Application.Current.MainPage.DisplayAlert("Error", $"Sign up failed: {ex.Message}", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return false;
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
         }
     }
 }
