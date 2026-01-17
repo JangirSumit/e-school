@@ -5,13 +5,15 @@
              xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
              x:Class="SchoolManagement.Views.LoginPage"
              Shell.NavBarIsVisible="False"
-             BackgroundColor="{StaticResource Gray100}">
+             BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}">
     <ScrollView>
         <VerticalStackLayout Padding="30" Spacing="25" VerticalOptions="Center">
-            <Image Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static m:MaterialOutlined.School}, Size=80, Color={StaticResource Primary}}" 
+            <Image Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static m:MaterialOutlined.School}, Size=80, Color={AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}}" 
                    HeightRequest="80" Margin="0,0,0,20"/>
-            <Label Text="eSchool" FontSize="36" FontAttributes="Bold" HorizontalOptions="Center" TextColor="{StaticResource Primary}"/>
-            <Label Text="Login to your account" FontSize="16" HorizontalOptions="Center" TextColor="{StaticResource Gray600}" Margin="0,0,0,30"/>
+            <Label Text="eSchool" FontSize="36" FontAttributes="Bold" HorizontalOptions="Center" 
+                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+            <Label Text="Login to your account" FontSize="16" HorizontalOptions="Center" 
+                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" Margin="0,0,0,30"/>
             
             <material:TextField Title="Email" Text="{Binding Email}" Keyboard="Email">
                 <material:TextField.Icon>

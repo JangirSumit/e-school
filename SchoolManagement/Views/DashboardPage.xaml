@@ -4,7 +4,7 @@
              xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
              x:Class="SchoolManagement.Views.DashboardPage"
              Title="Dashboard"
-             BackgroundColor="{StaticResource Gray100}">
+             BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
             <Frame BackgroundColor="{StaticResource Primary}" CornerRadius="15" Padding="20" HasShadow="True">
@@ -19,47 +19,67 @@
             </Frame>
             
             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="15" RowSpacing="15" Margin="0,10,0,0">
-                <Frame Grid.Row="0" Grid.Column="0" Padding="0" HasShadow="True" CornerRadius="15">
-                    <Button Text="Students" Command="{Binding NavigateToStudentsCommand}" BackgroundColor="White" TextColor="{StaticResource Primary}" 
+                <Frame Grid.Row="0" Grid.Column="0" Padding="0" HasShadow="True" CornerRadius="15" 
+                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                    <Button Text="Students" Command="{Binding NavigateToStudentsCommand}" 
+                            BackgroundColor="Transparent" 
+                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" 
                             HeightRequest="100" CornerRadius="15">
                         <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.School}" Size="40" Color="{StaticResource Primary}"/>
+                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.School}" Size="40" 
+                                           Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
                         </Button.ImageSource>
                     </Button>
                 </Frame>
                 
-                <Frame Grid.Row="0" Grid.Column="1" Padding="0" HasShadow="True" CornerRadius="15">
-                    <Button Text="Faculties" Command="{Binding NavigateToFacultiesCommand}" BackgroundColor="White" TextColor="{StaticResource Primary}" 
+                <Frame Grid.Row="0" Grid.Column="1" Padding="0" HasShadow="True" CornerRadius="15" 
+                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                    <Button Text="Faculties" Command="{Binding NavigateToFacultiesCommand}" 
+                            BackgroundColor="Transparent" 
+                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" 
                             HeightRequest="100" CornerRadius="15">
                         <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.People}" Size="40" Color="{StaticResource Primary}"/>
+                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.People}" Size="40" 
+                                           Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
                         </Button.ImageSource>
                     </Button>
                 </Frame>
                 
-                <Frame Grid.Row="1" Grid.Column="0" Padding="0" HasShadow="True" CornerRadius="15">
-                    <Button Text="Attendance" Command="{Binding NavigateToAttendanceCommand}" BackgroundColor="White" TextColor="{StaticResource Primary}" 
+                <Frame Grid.Row="1" Grid.Column="0" Padding="0" HasShadow="True" CornerRadius="15" 
+                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                    <Button Text="Attendance" Command="{Binding NavigateToAttendanceCommand}" 
+                            BackgroundColor="Transparent" 
+                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" 
                             HeightRequest="100" CornerRadius="15">
                         <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Check_circle}" Size="40" Color="{StaticResource Primary}"/>
+                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Check_circle}" Size="40" 
+                                           Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
                         </Button.ImageSource>
                     </Button>
                 </Frame>
                 
-                <Frame Grid.Row="1" Grid.Column="1" Padding="0" HasShadow="True" CornerRadius="15">
-                    <Button Text="Marks" Command="{Binding NavigateToMarksCommand}" BackgroundColor="White" TextColor="{StaticResource Primary}" 
+                <Frame Grid.Row="1" Grid.Column="1" Padding="0" HasShadow="True" CornerRadius="15" 
+                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                    <Button Text="Marks" Command="{Binding NavigateToMarksCommand}" 
+                            BackgroundColor="Transparent" 
+                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" 
                             HeightRequest="100" CornerRadius="15">
                         <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Grade}" Size="40" Color="{StaticResource Primary}"/>
+                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Grade}" Size="40" 
+                                           Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
                         </Button.ImageSource>
                     </Button>
                 </Frame>
                 
-                <Frame Grid.Row="2" Grid.Column="0" Padding="0" HasShadow="True" CornerRadius="15">
-                    <Button Text="Holidays" Command="{Binding NavigateToHolidaysCommand}" BackgroundColor="White" TextColor="{StaticResource Primary}" 
+                <Frame Grid.Row="2" Grid.Column="0" Padding="0" HasShadow="True" CornerRadius="15" 
+                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                    <Button Text="Holidays" Command="{Binding NavigateToHolidaysCommand}" 
+                            BackgroundColor="Transparent" 
+                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" 
                             HeightRequest="100" CornerRadius="15">
                         <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Event}" Size="40" Color="{StaticResource Primary}"/>
+                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Event}" Size="40" 
+                                           Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
                         </Button.ImageSource>
                     </Button>
                 </Frame>

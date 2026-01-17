@@ -5,15 +5,16 @@
              xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
              x:Class="SchoolManagement.Views.SignupPage"
              Title="School Signup"
-             BackgroundColor="{StaticResource Gray100}">
+             BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}">
     <ScrollView>
         <VerticalStackLayout Padding="30" Spacing="20">
-            <Image Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static m:MaterialOutlined.School}, Size=60, Color={StaticResource Primary}}" 
+            <Image Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static m:MaterialOutlined.School}, Size=60, Color={AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}}" 
                    HeightRequest="60" HorizontalOptions="Center" Margin="0,0,0,10"/>
             <Label Text="Register Your School" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center" 
-                   TextColor="{StaticResource Primary}" Margin="0,0,0,30"/>
+                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Margin="0,0,0,30"/>
             
-            <Label Text="School Information" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource Gray900}"/>
+            <Label Text="School Information" FontAttributes="Bold" FontSize="16" 
+                   TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}"/>
             <material:TextField Title="School Name *" Text="{Binding SchoolName}">
                 <material:TextField.Icon>
                     <FontImageSource FontFamily="MaterialRegular" Glyph="{x:Static m:MaterialRegular.Business}" Color="{StaticResource Primary}"/>
@@ -38,7 +39,8 @@
                 </material:TextField.Icon>
             </material:TextField>
             
-            <Label Text="Admin Account" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource Gray900}" Margin="0,20,0,0"/>
+            <Label Text="Admin Account" FontAttributes="Bold" FontSize="16" 
+                   TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" Margin="0,20,0,0"/>
             <material:TextField Title="Admin Name" Text="{Binding AdminName}">
                 <material:TextField.Icon>
                     <FontImageSource FontFamily="MaterialRegular" Glyph="{x:Static m:MaterialRegular.Person}" Color="{StaticResource Primary}"/>

@@ -4,7 +4,7 @@
              xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
              x:Class="SchoolManagement.Views.StudentsPage"
              Title="Students"
-             BackgroundColor="{StaticResource Gray100}">
+             BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}">
     <Grid RowDefinitions="Auto,*" Padding="10">
         <Button Grid.Row="0" Text="Add Student" Command="{Binding AddStudentCommand}" 
                 HeightRequest="50" CornerRadius="25" Margin="10">
@@ -16,16 +16,20 @@
         <CollectionView Grid.Row="1" ItemsSource="{Binding Students}" Margin="10,0">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Margin="0,5" Padding="15" HasShadow="True" CornerRadius="15" BackgroundColor="White">
+                    <Frame Margin="0,5" Padding="15" HasShadow="True" CornerRadius="15" 
+                           BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
                             <Image Grid.Column="0" 
-                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static m:MaterialOutlined.Account_circle}, Size=50, Color={StaticResource Primary}}" 
+                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static m:MaterialOutlined.Account_circle}, Size=50, Color={AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}}" 
                                    HeightRequest="50" WidthRequest="50" VerticalOptions="Center"/>
                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="5">
-                                <Label Text="{Binding RollNumber}" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource Gray900}"/>
+                                <Label Text="{Binding RollNumber}" FontAttributes="Bold" FontSize="16" 
+                                       TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}"/>
                                 <HorizontalStackLayout Spacing="10">
-                                    <Label Text="{Binding Class, StringFormat='Class: {0}'}" FontSize="14" TextColor="{StaticResource Gray600}"/>
-                                    <Label Text="{Binding Section, StringFormat='Section: {0}'}" FontSize="14" TextColor="{StaticResource Gray600}"/>
+                                    <Label Text="{Binding Class, StringFormat='Class: {0}'}" FontSize="14" 
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"/>
+                                    <Label Text="{Binding Section, StringFormat='Section: {0}'}" FontSize="14" 
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"/>
                                 </HorizontalStackLayout>
                             </VerticalStackLayout>
                         </Grid>
