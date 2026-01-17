@@ -1,34 +1,98 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using SchoolManagement.Data;
-using SchoolManagement.Helpers;
-using SchoolManagement.Models;
+using SchoolManagement.DTOs;
+using SchoolManagement.Services;
 
 namespace SchoolManagement.ViewModels;
 
 public class StudentsViewModel : BaseViewModel
 {
-    private readonly IDataStore _dataStore;
-    public ObservableCollection<Student> Students { get; } = new();
+    private readonly IApiService _apiService;
+    public ObservableCollection<StudentResponse> Students { get; } = new();
     public ICommand AddStudentCommand { get; }
+    public ICommand RefreshCommand { get; }
 
-    public StudentsViewModel(IDataStore dataStore)
+    public StudentsViewModel(IApiService apiService)
     {
-        _dataStore = dataStore;
+        _apiService = apiService;
         AddStudentCommand = new Command(async () => await AddStudentAsync());
-        LoadStudents();
+        RefreshCommand = new Command(async () => await LoadStudentsAsync());
+        _ = LoadStudentsAsync();
     }
 
-    private async void LoadStudents()
+    [Obsolete]
+    private async Task LoadStudentsAsync()
     {
-        var students = await _dataStore.GetStudentsAsync(SessionManager.CurrentTenantId);
-        Students.Clear();
-        foreach (var student in students)
-            Students.Add(student);
+        try
+        {
+            IsBusy = true;
+            var students = await _apiService.GetStudentsAsync();
+            Students.Clear();
+            foreach (var student in students)
+                Students.Add(student);
+        }
+        catch (Exception ex)
+        {
+            await Application.Current.MainPage.DisplayAlert("Error", $"Failed to load students: {ex.Message}", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
+    [Obsolete]
     private async Task AddStudentAsync()
     {
-        await Application.Current.MainPage.DisplayAlert("Info", "Add student feature coming soon", "OK");
+        var fullName = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Full Name:");
+        if (string.IsNullOrWhiteSpace(fullName)) return;
+
+        var email = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Email:", keyboard: Keyboard.Email);
+        if (string.IsNullOrWhiteSpace(email)) return;
+
+        var phone = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Phone:", keyboard: Keyboard.Telephone);
+        if (string.IsNullOrWhiteSpace(phone)) return;
+
+        var rollNumber = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Roll Number:");
+        if (string.IsNullOrWhiteSpace(rollNumber)) return;
+
+        var className = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Class:");
+        if (string.IsNullOrWhiteSpace(className)) return;
+
+        var section = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Section:");
+        if (string.IsNullOrWhiteSpace(section)) return;
+
+        var parentName = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Parent Name:");
+        if (string.IsNullOrWhiteSpace(parentName)) return;
+
+        var parentPhone = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Parent Phone:", keyboard: Keyboard.Telephone);
+        if (string.IsNullOrWhiteSpace(parentPhone)) return;
+
+        var password = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Password:");
+        if (string.IsNullOrWhiteSpace(password)) return;
+
+        try
+        {
+            IsBusy = true;
+            var request = new CreateStudentRequest(
+                fullName, email, phone, rollNumber, className, section,
+                DateTime.Now.AddYears(-10), parentName, parentPhone, password
+            );
+
+            var student = await _apiService.CreateStudentAsync(request);
+            if (student != null)
+            {
+                Students.Add(student);
+                await Application.Current.MainPage.DisplayAlert("Success", "Student added successfully", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await Application.Current.MainPage.DisplayAlert("Error", $"Failed to add student: {ex.Message}", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 }

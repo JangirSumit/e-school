@@ -1,33 +1,44 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": ".NET Core Launch (web)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/SchoolManagement.API/bin/Debug/net9.0/SchoolManagement.API.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}/SchoolManagement.API",
-            "stopAtEntry": false,
-            "serverReadyAction": {
-                "action": "openExternally",
-                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
-            },
-            "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
-            },
-            "sourceFileMap": {
-                "/Views": "${workspaceFolder}/Views"
-            }
-        },
-        {
-            "name": ".NET Core Attach",
-            "type": "coreclr",
-            "request": "attach"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch API",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-api",
+      "program": "${workspaceFolder}/SchoolManagement.API/bin/Debug/net9.0/SchoolManagement.API.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/SchoolManagement.API",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    },
+    {
+      "name": "Launch Windows App",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-windows",
+      "program": "${workspaceFolder}/SchoolManagement/bin/Debug/net9.0-windows10.0.19041.0/win10-x64/SchoolManagement.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}/SchoolManagement",
+      "stopAtEntry": false,
+      "console": "internalConsole"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launch API + Windows App",
+      "configurations": ["Launch API", "Launch Windows App"],
+      "stopAll": true,
+      "preLaunchTask": "build-all"
+    }
+  ]
 }

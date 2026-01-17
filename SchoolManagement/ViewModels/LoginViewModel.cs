@@ -31,6 +31,7 @@ public class LoginViewModel : BaseViewModel
         SignupCommand = new Command(async () => await NavigateToSignupAsync());
     }
 
+    [Obsolete]
     private async Task LoginAsync()
     {
         if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))

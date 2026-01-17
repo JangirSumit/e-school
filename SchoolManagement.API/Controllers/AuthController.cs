@@ -27,7 +27,7 @@ public class AuthController : ControllerBase
     public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-        if (user == null || user.PasswordHash != HashPassword(request.Password))
+        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             return Unauthorized(new { message = "Invalid credentials" });
 
         var token = GenerateJwtToken(user);
@@ -51,6 +51,9 @@ public class AuthController : ControllerBase
             SubscriptionEnd = DateTime.UtcNow.AddYears(1)
         };
 
+        _context.Tenants.Add(tenant);
+        await _context.SaveChangesAsync();
+
         var user = new User
         {
             TenantId = tenant.Id,
@@ -58,10 +61,9 @@ public class AuthController : ControllerBase
             FullName = request.AdminName,
             Phone = request.Phone,
             Role = UserRole.Admin,
-            PasswordHash = HashPassword(request.Password)
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
         };
 
-        _context.Tenants.Add(tenant);
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
@@ -91,7 +93,4 @@ public class AuthController : ControllerBase
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-
-    private static string HashPassword(string password) =>
-        Convert.ToBase64String(Encoding.UTF8.GetBytes(password));
 }

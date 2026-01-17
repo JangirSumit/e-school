@@ -23,8 +23,10 @@
                                    Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static m:MaterialOutlined.Account_circle}, Size=50, Color={AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}}" 
                                    HeightRequest="50" WidthRequest="50" VerticalOptions="Center"/>
                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="5">
-                                <Label Text="{Binding RollNumber}" FontAttributes="Bold" FontSize="16" 
+                                <Label Text="{Binding FullName}" FontAttributes="Bold" FontSize="16" 
                                        TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}"/>
+                                <Label Text="{Binding RollNumber, StringFormat='Roll: {0}'}" FontSize="14" 
+                                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"/>
                                 <HorizontalStackLayout Spacing="10">
                                     <Label Text="{Binding Class, StringFormat='Class: {0}'}" FontSize="14" 
                                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"/>

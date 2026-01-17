@@ -1,0 +1,70 @@
+name: Deploy API
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g., 1.0.0)'
+        required: true
+        default: '1.0.0'
+
+env:
+  DOTNET_VERSION: '9.0.x'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Get version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        else
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Restore
+      run: dotnet restore SchoolManagement.API/SchoolManagement.API.csproj
+      
+    - name: Build
+      run: dotnet build SchoolManagement.API/SchoolManagement.API.csproj -c Release --no-restore
+      
+    - name: Publish
+      run: dotnet publish SchoolManagement.API/SchoolManagement.API.csproj -c Release -o ./publish
+      
+    - name: Create version file
+      run: |
+        echo "Version: ${{ steps.version.outputs.VERSION }}" > ./publish/version.txt
+        echo "Build: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> ./publish/version.txt
+        echo "Commit: ${{ github.sha }}" >> ./publish/version.txt
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: api-v${{ steps.version.outputs.VERSION }}
+        path: ./publish/
+        
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./publish/**/*
+        body: |
+          ## API v${{ steps.version.outputs.VERSION }}
+          
+          Download and extract to your server.
+          Run: `dotnet SchoolManagement.API.dll`
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

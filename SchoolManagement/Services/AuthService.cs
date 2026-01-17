@@ -1,51 +1,69 @@
-using SchoolManagement.Data;
+using SchoolManagement.DTOs;
 using SchoolManagement.Helpers;
-using SchoolManagement.Models;
 
 namespace SchoolManagement.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly IDataStore _dataStore;
+    private readonly IApiService _apiService;
 
-    public AuthService(IDataStore dataStore)
+    public AuthService(IApiService apiService)
     {
-        _dataStore = dataStore;
+        _apiService = apiService;
     }
 
-    public async Task<(bool Success, string Message, User User)> LoginAsync(string email, string password)
+    public async Task<(bool Success, string Message, Models.User User)> LoginAsync(string email, string password)
     {
-        var user = await _dataStore.GetUserByEmailAsync(email);
-        if (user == null || user.PasswordHash != HashPassword(password))
-            return (false, "Invalid credentials", null);
+        try
+        {
+            var response = await _apiService.LoginAsync(new LoginRequest(email, password));
+            if (response == null)
+                return (false, "Invalid credentials", null!);
 
-        SessionManager.CurrentUserId = user.Id;
-        SessionManager.CurrentTenantId = user.TenantId;
-        SessionManager.CurrentUserRole = user.Role.ToString();
-        SessionManager.CurrentUserName = user.FullName;
+            SessionManager.CurrentUserId = response.UserId;
+            SessionManager.CurrentTenantId = response.TenantId;
+            SessionManager.CurrentUserRole = response.Role;
+            SessionManager.CurrentUserName = response.FullName;
+            SessionManager.AuthToken = response.Token;
 
-        return (true, "Login successful", user);
+            _apiService.SetAuthToken(response.Token);
+
+            return (true, "Login successful", new Models.User
+            {
+                Id = response.UserId,
+                TenantId = response.TenantId,
+                FullName = response.FullName,
+                Email = email
+            });
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Login failed: {ex.Message}", null!);
+        }
     }
 
-    public async Task<(bool Success, string Message)> SignupSchoolAsync(Tenant tenant, User adminUser, string password)
+    public async Task<(bool Success, string Message)> SignupSchoolAsync(Models.Tenant tenant, Models.User adminUser, string password)
     {
-        var existing = await _dataStore.GetUserByEmailAsync(adminUser.Email);
-        if (existing != null)
-            return (false, "Email already exists");
+        try
+        {
+            var request = new SignupRequest(
+                tenant.SchoolName,
+                tenant.Email,
+                tenant.Phone,
+                tenant.Address,
+                adminUser.FullName,
+                password
+            );
 
-        tenant.IsActive = true;
-        tenant.SubscriptionStart = DateTime.UtcNow;
-        tenant.SubscriptionEnd = DateTime.UtcNow.AddYears(1);
-
-        await _dataStore.AddTenantAsync(tenant);
-
-        adminUser.TenantId = tenant.Id;
-        adminUser.Role = UserRole.Admin;
-        adminUser.PasswordHash = HashPassword(password);
-
-        await _dataStore.AddUserAsync(adminUser);
-
-        return (true, "School registered successfully");
+            var response = await _apiService.SignupAsync(request);
+            return response == null 
+                ? (false, "Signup failed") 
+                : (response.Success, response.Message);
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Signup failed: {ex.Message}");
+        }
     }
 
     public Task LogoutAsync()
@@ -53,7 +71,4 @@ public class AuthService : IAuthService
         SessionManager.ClearSession();
         return Task.CompletedTask;
     }
-
-    private string HashPassword(string password) => 
-        Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(password));
 }

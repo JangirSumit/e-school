@@ -23,7 +23,7 @@ public static class MauiProgram
 				fonts.AddMaterialIconFonts();
 			});
 
-		builder.Services.AddSingleton<IDataStore, InMemoryDataStore>();
+		builder.Services.AddSingleton<IApiService, ApiService>();
 		builder.Services.AddSingleton<IAuthService, AuthService>();
 		
 		builder.Services.AddTransient<LoginPage>();
