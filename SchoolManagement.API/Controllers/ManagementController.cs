@@ -188,9 +188,15 @@ public class ManagementController : ControllerBase
             Phone = request.Phone,
             Address = request.Address,
             ContactPersonName = request.ContactPersonName,
+            SubscriptionPlan = "Standard",
+            BillingCycle = "Yearly",
+            BillingAmount = 25000,
+            LicenseSeats = 100,
+            LicensedModules = "Admissions,Academics,Attendance,Parents,Reports",
             IsActive = true,
             SubscriptionStart = DateTime.UtcNow,
-            SubscriptionEnd = DateTime.UtcNow.AddYears(1)
+            SubscriptionEnd = DateTime.UtcNow.AddYears(1),
+            NextBillingDate = DateTime.UtcNow.AddYears(1)
         };
 
         var admin = new User
@@ -215,7 +221,19 @@ public class ManagementController : ControllerBase
             tenant.ContactPersonName,
             tenant.Email,
             tenant.Phone,
+            tenant.Address,
             tenant.IsActive,
+            tenant.SubscriptionPlan,
+            tenant.BillingCycle,
+            tenant.BillingAmount,
+            tenant.SubscriptionStart,
+            tenant.SubscriptionEnd,
+            tenant.LastBillingDate,
+            tenant.NextBillingDate,
+            tenant.LicenseSeats,
+            tenant.LicensedModules,
+            tenant.BillingNotes,
+            tenant.CreatedAt,
             0,
             0,
             0));
@@ -232,6 +250,40 @@ public class ManagementController : ControllerBase
         tenant.IsActive = request.IsActive;
         await _context.SaveChangesAsync();
         return NoContent();
+    }
+
+    [Authorize(Roles = nameof(UserRole.Owner))]
+    [HttpPut("schools/{id}")]
+    public async Task<ActionResult<TenantSummaryResponse>> UpdateSchool(string id, UpdateSchoolManagementRequest request)
+    {
+        var tenant = await _context.Tenants
+            .Include(t => t.Students)
+            .Include(t => t.Faculties)
+            .Include(t => t.Classes)
+            .FirstOrDefaultAsync(t => t.Id == id);
+
+        if (tenant == null)
+            return NotFound();
+
+        tenant.ContactPersonName = request.ContactPersonName.Trim();
+        tenant.Email = request.Email.Trim();
+        tenant.Phone = request.Phone.Trim();
+        tenant.Address = request.Address.Trim();
+        tenant.IsActive = request.IsActive;
+        tenant.SubscriptionPlan = request.SubscriptionPlan.Trim();
+        tenant.BillingCycle = request.BillingCycle.Trim();
+        tenant.BillingAmount = request.BillingAmount;
+        tenant.SubscriptionStart = request.SubscriptionStart;
+        tenant.SubscriptionEnd = request.SubscriptionEnd;
+        tenant.LastBillingDate = request.LastBillingDate;
+        tenant.NextBillingDate = request.NextBillingDate;
+        tenant.LicenseSeats = request.LicenseSeats;
+        tenant.LicensedModules = request.LicensedModules.Trim();
+        tenant.BillingNotes = request.BillingNotes.Trim();
+
+        await _context.SaveChangesAsync();
+
+        return Ok(MapTenantSummary(tenant));
     }
 
     [Authorize(Roles = $"{nameof(UserRole.SchoolAdmin)},{nameof(UserRole.Faculty)}")]
@@ -282,22 +334,38 @@ public class ManagementController : ControllerBase
 
     private async Task<List<TenantSummaryResponse>> BuildTenantSummariesAsync()
     {
-        return await _context.Tenants
+        var tenants = await _context.Tenants
             .OrderBy(t => t.SchoolName)
-            .Select(t => new TenantSummaryResponse(
-                t.Id,
-                t.SchoolName,
-                t.SchoolCode,
-                t.ContactPersonName,
-                t.Email,
-                t.Phone,
-                t.IsActive,
-                t.Students.Count,
-                t.Faculties.Count,
-                t.Classes.Count
-            ))
             .ToListAsync();
+
+        return tenants.Select(MapTenantSummary).ToList();
     }
+
+    private static TenantSummaryResponse MapTenantSummary(Tenant t) =>
+        new(
+            t.Id,
+            t.SchoolName,
+            t.SchoolCode,
+            t.ContactPersonName,
+            t.Email,
+            t.Phone,
+            t.Address,
+            t.IsActive,
+            t.SubscriptionPlan,
+            t.BillingCycle,
+            t.BillingAmount,
+            t.SubscriptionStart,
+            t.SubscriptionEnd,
+            t.LastBillingDate,
+            t.NextBillingDate,
+            t.LicenseSeats,
+            t.LicensedModules,
+            t.BillingNotes,
+            t.CreatedAt,
+            t.Students.Count,
+            t.Faculties.Count,
+            t.Classes.Count
+        );
 
     private async Task<List<ClassResponse>> BuildClassesAsync(string tenantId, string? classTeacherUserId = null)
     {

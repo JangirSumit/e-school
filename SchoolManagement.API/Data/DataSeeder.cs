@@ -10,8 +10,11 @@ public static class DataSeeder
         await using var scope = services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<SchoolDbContext>();
 
-        await context.Database.EnsureCreatedAsync();
-        await EnsureSchemaAsync(context);
+        await context.Database.MigrateAsync();
+        if (context.Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            await EnsureSchemaAsync(context);
+        }
 
         var ownerEmail = configuration["OwnerAdmin:Email"] ?? "owner@eschool.app";
         var ownerPassword = configuration["OwnerAdmin:Password"] ?? "Owner@123";
@@ -28,9 +31,15 @@ public static class DataSeeder
                 Phone = configuration["OwnerAdmin:Phone"] ?? "+10000000000",
                 Address = "Platform",
                 ContactPersonName = ownerName,
+                SubscriptionPlan = "Platform",
+                BillingCycle = "Internal",
+                BillingAmount = 0,
+                LicenseSeats = 9999,
+                LicensedModules = "Owner,Licensing,Billing",
                 IsActive = true,
                 SubscriptionStart = DateTime.UtcNow,
-                SubscriptionEnd = DateTime.UtcNow.AddYears(10)
+                SubscriptionEnd = DateTime.UtcNow.AddYears(10),
+                NextBillingDate = null
             };
 
             context.Tenants.Add(platformTenant);
@@ -56,6 +65,14 @@ public static class DataSeeder
     private static async Task EnsureSchemaAsync(SchoolDbContext context)
     {
         await EnsureColumnAsync(context, "Tenants", "ContactPersonName", "TEXT NOT NULL DEFAULT ''");
+        await EnsureColumnAsync(context, "Tenants", "SubscriptionPlan", "TEXT NOT NULL DEFAULT 'Standard'");
+        await EnsureColumnAsync(context, "Tenants", "BillingCycle", "TEXT NOT NULL DEFAULT 'Yearly'");
+        await EnsureColumnAsync(context, "Tenants", "BillingAmount", "TEXT NOT NULL DEFAULT 0");
+        await EnsureColumnAsync(context, "Tenants", "LastBillingDate", "TEXT NULL");
+        await EnsureColumnAsync(context, "Tenants", "NextBillingDate", "TEXT NULL");
+        await EnsureColumnAsync(context, "Tenants", "LicenseSeats", "INTEGER NOT NULL DEFAULT 100");
+        await EnsureColumnAsync(context, "Tenants", "LicensedModules", "TEXT NOT NULL DEFAULT 'Core'");
+        await EnsureColumnAsync(context, "Tenants", "BillingNotes", "TEXT NOT NULL DEFAULT ''");
         await EnsureColumnAsync(context, "Students", "ParentUserId", "TEXT NULL");
         await EnsureColumnAsync(context, "Students", "ClassId", "TEXT NULL");
         await EnsureColumnAsync(context, "Faculties", "Username", "TEXT NULL");

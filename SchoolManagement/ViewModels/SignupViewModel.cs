@@ -7,6 +7,7 @@ namespace SchoolManagement.ViewModels;
 public class SignupViewModel : BaseViewModel
 {
     private readonly IAuthService _authService;
+    private readonly IApiService _apiService;
     private string _schoolName;
     private string _email;
     private string _phone;
@@ -14,6 +15,9 @@ public class SignupViewModel : BaseViewModel
     private string _adminName;
     private string _adminUsername;
     private string _password;
+    private string _helpMessage = string.Empty;
+    private string _supportEmail = "support@eschool.app";
+    private string _supportPhone = string.Empty;
 
     public string SchoolName { get => _schoolName; set => SetProperty(ref _schoolName, value); }
     public string Email { get => _email; set => SetProperty(ref _email, value); }
@@ -22,13 +26,36 @@ public class SignupViewModel : BaseViewModel
     public string AdminName { get => _adminName; set => SetProperty(ref _adminName, value); }
     public string AdminUsername { get => _adminUsername; set => SetProperty(ref _adminUsername, value); }
     public string Password { get => _password; set => SetProperty(ref _password, value); }
+    public string HelpMessage { get => _helpMessage; set => SetProperty(ref _helpMessage, value); }
+    public string SupportEmail { get => _supportEmail; set => SetProperty(ref _supportEmail, value); }
+    public string SupportPhone { get => _supportPhone; set => SetProperty(ref _supportPhone, value); }
 
     public ICommand SignupCommand { get; }
 
-    public SignupViewModel(IAuthService authService)
+    public SignupViewModel(IAuthService authService, IApiService apiService)
     {
         _authService = authService;
+        _apiService = apiService;
         SignupCommand = new Command(async () => await SignupAsync(), () => !IsBusy);
+        _ = LoadAppInfoAsync();
+    }
+
+    private async Task LoadAppInfoAsync()
+    {
+        try
+        {
+            var info = await _apiService.GetPublicAppInfoAsync();
+            if (info == null)
+                return;
+
+            HelpMessage = info.HelpMessage;
+            SupportEmail = info.SupportEmail;
+            SupportPhone = info.SupportPhone;
+        }
+        catch
+        {
+            // Keep defaults if public info cannot be loaded.
+        }
     }
 
     [Obsolete]

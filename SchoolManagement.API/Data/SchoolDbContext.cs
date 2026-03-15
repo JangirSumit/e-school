@@ -36,51 +36,54 @@ public class SchoolDbContext : DbContext
             .HasOne(u => u.Tenant)
             .WithMany(t => t.Users)
             .HasForeignKey(u => u.TenantId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Student>()
             .HasOne(s => s.Tenant)
             .WithMany(t => t.Students)
-            .HasForeignKey(s => s.TenantId);
+            .HasForeignKey(s => s.TenantId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Student>()
             .HasOne(s => s.User)
             .WithMany()
             .HasForeignKey(s => s.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Student>()
             .HasOne(s => s.ParentUser)
             .WithMany()
             .HasForeignKey(s => s.ParentUserId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Student>()
             .HasOne(s => s.SchoolClass)
             .WithMany(c => c.Students)
             .HasForeignKey(s => s.ClassId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Faculty>()
             .HasOne(f => f.Tenant)
             .WithMany(t => t.Faculties)
-            .HasForeignKey(f => f.TenantId);
+            .HasForeignKey(f => f.TenantId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Faculty>()
             .HasOne(f => f.User)
             .WithMany()
             .HasForeignKey(f => f.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<SchoolClass>()
             .HasOne(c => c.Tenant)
             .WithMany(t => t.Classes)
-            .HasForeignKey(c => c.TenantId);
+            .HasForeignKey(c => c.TenantId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<SchoolClass>()
             .HasOne(c => c.ClassTeacherUser)
             .WithMany()
             .HasForeignKey(c => c.ClassTeacherUserId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

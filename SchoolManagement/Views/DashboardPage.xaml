@@ -91,7 +91,10 @@
                         <Button Text="Create Class" Command="{Binding AddClassCommand}" HorizontalOptions="FillAndExpand" />
                         <Button Text="Add Faculty" Command="{Binding AddFacultyCommand}" HorizontalOptions="FillAndExpand" BackgroundColor="#2563EB" />
                     </HorizontalStackLayout>
-                    <Button Text="Admit Student + Parent" Command="{Binding AddStudentCommand}" BackgroundColor="#0F766E" />
+                    <HorizontalStackLayout Spacing="12">
+                        <Button Text="Admit Student + Parent" Command="{Binding AddStudentCommand}" HorizontalOptions="FillAndExpand" BackgroundColor="#0F766E" />
+                        <Button Text="Add Holiday" Command="{Binding AddHolidayCommand}" HorizontalOptions="FillAndExpand" BackgroundColor="#D97706" />
+                    </HorizontalStackLayout>
 
                     <Label Text="Classes" FontAttributes="Bold" FontSize="18" />
                     <CollectionView ItemsSource="{Binding Classes}" SelectionMode="None">
@@ -139,6 +142,22 @@
                                         <Label Text="{Binding RollNumber, StringFormat='Roll: {0}'}" />
                                         <Label Text="{Binding Class, StringFormat='Class: {0}'}" />
                                         <Label Text="{Binding ParentName, StringFormat='Parent: {0}'}" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label Text="Holiday Calendar" FontAttributes="Bold" FontSize="18" />
+                    <CollectionView ItemsSource="{Binding Holidays}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Margin="0,0,0,10" Padding="16" CornerRadius="16"
+                                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Date, StringFormat='Date: {0:dd MMM yyyy}'}" />
+                                        <Label Text="{Binding Description}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
                                     </VerticalStackLayout>
                                 </Frame>
                             </DataTemplate>
@@ -195,6 +214,40 @@
                                         <Label Text="{Binding Section, StringFormat='Section: {0}'}" />
                                         <Label Text="{Binding AttendancePercentage, StringFormat='Attendance: {0}%'}" />
                                         <Label Text="{Binding AverageMarks, StringFormat='Average marks: {0}%'}" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label Text="School Holidays" FontAttributes="Bold" FontSize="18" />
+                    <CollectionView ItemsSource="{Binding Holidays}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Margin="0,0,0,10" Padding="16" CornerRadius="16"
+                                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Date, StringFormat='Date: {0:dd MMM yyyy}'}" />
+                                        <Label Text="{Binding Description}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout IsVisible="{Binding IsStudent}" Spacing="12">
+                    <Label Text="Upcoming School Holidays" FontAttributes="Bold" FontSize="18" />
+                    <CollectionView ItemsSource="{Binding Holidays}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Margin="0,0,0,10" Padding="16" CornerRadius="16"
+                                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Date, StringFormat='Date: {0:dd MMM yyyy}'}" />
+                                        <Label Text="{Binding Description}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
                                     </VerticalStackLayout>
                                 </Frame>
                             </DataTemplate>

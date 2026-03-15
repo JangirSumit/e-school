@@ -2,12 +2,14 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using SchoolManagement.DTOs;
+using SchoolManagement.Models;
 
 namespace SchoolManagement.Services;
 
 public interface IApiService
 {
     Task<LoginResponse?> LoginAsync(LoginRequest request);
+    Task<PublicAppInfoResponse?> GetPublicAppInfoAsync();
     Task<SignupResponse?> SignupAsync(SignupRequest request);
     Task<DashboardResponse?> GetDashboardAsync();
     Task<List<StudentResponse>> GetStudentsAsync();
@@ -20,6 +22,8 @@ public interface IApiService
     Task<ClassResponse?> CreateClassAsync(CreateClassRequest request);
     Task<List<FacultyResponse>> GetFacultyAsync();
     Task<FacultyResponse?> CreateFacultyAsync(CreateFacultyRequest request);
+    Task<List<Holiday>> GetHolidaysAsync();
+    Task<Holiday?> CreateHolidayAsync(Holiday holiday);
     void SetAuthToken(string token);
 }
 
@@ -78,6 +82,9 @@ public class ApiService : IApiService
             throw new Exception("Request timeout. Please check if API is running.");
         }
     }
+
+    public Task<PublicAppInfoResponse?> GetPublicAppInfoAsync() =>
+        _httpClient.GetFromJsonAsync<PublicAppInfoResponse>("/api/public/app-info", _jsonOptions);
 
     public async Task<SignupResponse?> SignupAsync(SignupRequest request)
     {
@@ -152,5 +159,15 @@ public class ApiService : IApiService
         var response = await _httpClient.PostAsJsonAsync("/api/faculties", request);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<FacultyResponse>(_jsonOptions);
+    }
+
+    public Task<List<Holiday>> GetHolidaysAsync() =>
+        _httpClient.GetFromJsonAsync<List<Holiday>>("/api/holidays", _jsonOptions)!;
+
+    public async Task<Holiday?> CreateHolidayAsync(Holiday holiday)
+    {
+        var response = await _httpClient.PostAsJsonAsync("/api/holidays", holiday);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<Holiday>(_jsonOptions);
     }
 }

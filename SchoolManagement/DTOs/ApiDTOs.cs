@@ -2,6 +2,15 @@ namespace SchoolManagement.DTOs;
 
 public record LoginRequest(string Email, string Password);
 public record LoginResponse(string Token, string UserId, string TenantId, string Role, string FullName, string SchoolName, string SchoolCode);
+public record PublicAppInfoResponse(
+    string AppName,
+    string Tagline,
+    string SupportEmail,
+    string SupportPhone,
+    string SupportWhatsApp,
+    string HelpMessage,
+    string LoginHint
+);
 
 public record SignupRequest(
     string SchoolName,

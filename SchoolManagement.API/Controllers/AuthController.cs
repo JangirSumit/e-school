@@ -66,6 +66,14 @@ public class AuthController : ControllerBase
         }
 
         var token = GenerateJwtToken(user);
+        Response.Cookies.Append("eschool_auth", token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax,
+            Expires = DateTimeOffset.UtcNow.AddDays(7)
+        });
+
         return Ok(new LoginResponse(
             token,
             user.Id,
@@ -76,64 +84,24 @@ public class AuthController : ControllerBase
             user.Role == UserRole.Owner ? string.Empty : tenant?.SchoolCode ?? string.Empty));
     }
 
-    [HttpPost("signup")]
-    public async Task<ActionResult<SignupResponse>> Signup(SignupRequest request)
+    [HttpPost("logout")]
+    public IActionResult Logout()
     {
-        if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-            return BadRequest(new SignupResponse(false, "Email already exists"));
-
-        // Generate school code from school name (first 3-4 letters, uppercase)
-        var schoolCode = GenerateSchoolCode(request.SchoolName);
-        
-        // Ensure uniqueness
-        var existingCode = await _context.Tenants.FirstOrDefaultAsync(t => t.SchoolCode == schoolCode);
-        if (existingCode != null)
+        Response.Cookies.Delete("eschool_auth", new CookieOptions
         {
-            schoolCode = schoolCode + new Random().Next(10, 99);
-        }
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax
+        });
 
-        var tenant = new Tenant
-        {
-            SchoolCode = schoolCode,
-            SchoolName = request.SchoolName,
-            Email = request.Email,
-            Phone = request.Phone,
-            Address = request.Address,
-            ContactPersonName = request.AdminName,
-            IsActive = true,
-            SubscriptionStart = DateTime.UtcNow,
-            SubscriptionEnd = DateTime.UtcNow.AddYears(1)
-        };
-
-        _context.Tenants.Add(tenant);
-        await _context.SaveChangesAsync();
-
-        var user = new User
-        {
-            TenantId = tenant.Id,
-            Username = string.IsNullOrWhiteSpace(request.AdminUsername) ? "admin" : request.AdminUsername.Trim().ToLowerInvariant(),
-            Email = request.Email,
-            FullName = request.AdminName,
-            Phone = request.Phone,
-            Role = UserRole.SchoolAdmin,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
-        };
-
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
-
-        return Ok(new SignupResponse(true, $"School registered successfully. School Code: {schoolCode}"));
+        return NoContent();
     }
 
-    private string GenerateSchoolCode(string schoolName)
+    [HttpPost("signup")]
+    public ActionResult<SignupResponse> Signup(SignupRequest request)
     {
-        var words = schoolName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (words.Length >= 2)
-        {
-            return (words[0].Substring(0, Math.Min(2, words[0].Length)) + 
-                   words[1].Substring(0, Math.Min(2, words[1].Length))).ToUpper();
-        }
-        return schoolName.Substring(0, Math.Min(4, schoolName.Length)).ToUpper();
+        return StatusCode(StatusCodes.Status403Forbidden,
+            new SignupResponse(false, "School onboarding is handled only by the app owner after pricing and billing discussion. Please contact support."));
     }
 
     private string GenerateJwtToken(User user)

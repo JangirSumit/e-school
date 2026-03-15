@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using SchoolManagement.DTOs;
 using SchoolManagement.Helpers;
+using SchoolManagement.Models;
 using SchoolManagement.Services;
 
 namespace SchoolManagement.ViewModels;
@@ -33,6 +34,7 @@ public class DashboardViewModel : BaseViewModel
                 OnPropertyChanged(nameof(IsSchoolAdmin));
                 OnPropertyChanged(nameof(IsFaculty));
                 OnPropertyChanged(nameof(IsParent));
+                OnPropertyChanged(nameof(IsStudent));
             }
         }
     }
@@ -53,6 +55,7 @@ public class DashboardViewModel : BaseViewModel
     public bool IsSchoolAdmin => Role == "SchoolAdmin";
     public bool IsFaculty => Role == "Faculty";
     public bool IsParent => Role == "Parent";
+    public bool IsStudent => Role == "Student";
 
     public ObservableCollection<SummaryMetric> Metrics { get; } = new();
     public ObservableCollection<ActionItem> Highlights { get; } = new();
@@ -61,6 +64,7 @@ public class DashboardViewModel : BaseViewModel
     public ObservableCollection<FacultyResponse> FacultyMembers { get; } = new();
     public ObservableCollection<StudentResponse> Students { get; } = new();
     public ObservableCollection<ParentChildResponse> Children { get; } = new();
+    public ObservableCollection<Holiday> Holidays { get; } = new();
 
     public ICommand RefreshCommand { get; }
     public ICommand LogoutCommand { get; }
@@ -69,6 +73,7 @@ public class DashboardViewModel : BaseViewModel
     public ICommand AddClassCommand { get; }
     public ICommand AddFacultyCommand { get; }
     public ICommand AddStudentCommand { get; }
+    public ICommand AddHolidayCommand { get; }
 
     public DashboardViewModel(IAuthService authService, IApiService apiService)
     {
@@ -86,6 +91,7 @@ public class DashboardViewModel : BaseViewModel
         AddClassCommand = new Command(async () => await AddClassAsync());
         AddFacultyCommand = new Command(async () => await AddFacultyAsync());
         AddStudentCommand = new Command(async () => await AddStudentAsync());
+        AddHolidayCommand = new Command(async () => await AddHolidayAsync());
     }
 
     public async Task InitializeAsync()
@@ -117,6 +123,7 @@ public class DashboardViewModel : BaseViewModel
             ReplaceCollection(FacultyMembers, dashboard.FacultyMembers);
             ReplaceCollection(Students, dashboard.Students);
             ReplaceCollection(Children, dashboard.Children);
+            await LoadHolidaysAsync();
         }
         catch (Exception ex)
         {
@@ -346,6 +353,48 @@ public class DashboardViewModel : BaseViewModel
         {
             IsBusy = false;
         }
+    }
+
+    private async Task AddHolidayAsync()
+    {
+        var name = await PromptAsync("Add Holiday", "Holiday name");
+        if (string.IsNullOrWhiteSpace(name)) return;
+
+        var dateText = await PromptAsync("Add Holiday", "Date (YYYY-MM-DD)");
+        if (!DateTime.TryParse(dateText, out var date))
+            date = DateTime.UtcNow.Date;
+
+        var description = await PromptAsync("Add Holiday", "Description");
+        description ??= string.Empty;
+
+        try
+        {
+            IsBusy = true;
+            await _apiService.CreateHolidayAsync(new Holiday
+            {
+                Name = name,
+                Date = date,
+                Description = description
+            });
+            await LoadHolidaysAsync();
+        }
+        catch (Exception ex)
+        {
+            await Application.Current!.MainPage!.DisplayAlert("Error", $"Unable to add holiday: {ex.Message}", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task LoadHolidaysAsync()
+    {
+        if (!(IsSchoolAdmin || IsParent || Role == "Student"))
+            return;
+
+        var holidays = await _apiService.GetHolidaysAsync();
+        ReplaceCollection(Holidays, holidays.OrderBy(h => h.Date));
     }
 
     private async Task LogoutAsync()

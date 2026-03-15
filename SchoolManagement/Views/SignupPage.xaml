@@ -4,73 +4,55 @@
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
              x:Class="SchoolManagement.Views.SignupPage"
-             Title="School Signup"
-             BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}">
+             Title="School Signup">
     <Grid>
         <ScrollView>
-            <VerticalStackLayout Padding="30" Spacing="20">
-                <Image Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static m:MaterialOutlined.School}, Size=60, Color={AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}}" 
-                       HeightRequest="60" HorizontalOptions="Center" Margin="0,0,0,10"/>
-                <Label Text="Register Your School" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center" 
-                       TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Margin="0,0,0,30"/>
-                
-                <Label Text="School Information" FontAttributes="Bold" FontSize="16" 
-                       TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}"/>
-                <material:TextField Title="School Name *" Text="{Binding SchoolName}">
-                    <material:TextField.Icon>
-                        <FontImageSource FontFamily="MaterialRegular" Glyph="{x:Static m:MaterialRegular.Business}" Color="{StaticResource Primary}"/>
-                    </material:TextField.Icon>
-                </material:TextField>
-                
-                <material:TextField Title="Email *" Text="{Binding Email}" Keyboard="Email">
-                    <material:TextField.Icon>
-                        <FontImageSource FontFamily="MaterialRegular" Glyph="{x:Static m:MaterialRegular.Email}" Color="{StaticResource Primary}"/>
-                    </material:TextField.Icon>
-                </material:TextField>
-                
-                <material:TextField Title="Phone" Text="{Binding Phone}" Keyboard="Telephone">
-                    <material:TextField.Icon>
-                        <FontImageSource FontFamily="MaterialRegular" Glyph="{x:Static m:MaterialRegular.Phone}" Color="{StaticResource Primary}"/>
-                    </material:TextField.Icon>
-                </material:TextField>
-                
-                <material:TextField Title="Address" Text="{Binding Address}">
-                    <material:TextField.Icon>
-                        <FontImageSource FontFamily="MaterialRegular" Glyph="{x:Static m:MaterialRegular.Location_on}" Color="{StaticResource Primary}"/>
-                    </material:TextField.Icon>
-                </material:TextField>
-                
-                <Label Text="Admin Account" FontAttributes="Bold" FontSize="16" 
-                       TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" Margin="0,20,0,0"/>
-                <material:TextField Title="Admin Name" Text="{Binding AdminName}">
-                    <material:TextField.Icon>
-                        <FontImageSource FontFamily="MaterialRegular" Glyph="{x:Static m:MaterialRegular.Person}" Color="{StaticResource Primary}"/>
-                    </material:TextField.Icon>
-                </material:TextField>
+            <VerticalStackLayout Padding="24" Spacing="18">
+                <Border StrokeThickness="0" BackgroundColor="{StaticResource White}" Padding="24" StrokeShape="RoundRectangle 28">
+                    <VerticalStackLayout Spacing="16">
+                        <HorizontalStackLayout Spacing="14">
+                            <Frame HeightRequest="64" WidthRequest="64" CornerRadius="32" BackgroundColor="{StaticResource Secondary}" Padding="0" HasShadow="False">
+                                <Image Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static m:MaterialOutlined.Domain_add}, Size=34, Color={StaticResource Primary}}"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center" />
+                            </Frame>
+                            <VerticalStackLayout>
+                                <Label Text="Register Your School" FontSize="26" FontAttributes="Bold" />
+                                <Label Text="Create a school account with admin access in a school-friendly setup flow." FontSize="14" TextColor="{StaticResource Gray600}" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
 
-                <material:TextField Title="Admin Username" Text="{Binding AdminUsername}">
-                    <material:TextField.Icon>
-                        <FontImageSource FontFamily="MaterialRegular" Glyph="{x:Static m:MaterialRegular.Badge}" Color="{StaticResource Primary}"/>
-                    </material:TextField.Icon>
-                </material:TextField>
-                
-                <material:TextField Title="Password *" Text="{Binding Password}" IsPassword="True">
-                    <material:TextField.Icon>
-                        <FontImageSource FontFamily="MaterialRegular" Glyph="{x:Static m:MaterialRegular.Lock}" Color="{StaticResource Primary}"/>
-                    </material:TextField.Icon>
-                </material:TextField>
-                
-                <Button Text="Sign Up" Command="{Binding SignupCommand}" 
-                        IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" 
-                        HeightRequest="50" CornerRadius="25" Margin="0,20,0,0"/>
+                        <Border StrokeThickness="0" BackgroundColor="{StaticResource Sunshine}" Padding="14" StrokeShape="RoundRectangle 18">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{Binding HelpMessage}" FontSize="14" TextColor="{StaticResource Gray900}" />
+                                <Label Text="{Binding SupportEmail, StringFormat='Support email: {0}'}" FontSize="13" TextColor="{StaticResource Gray600}" />
+                                <Label Text="{Binding SupportPhone, StringFormat='Support phone: {0}'}" FontSize="13" TextColor="{StaticResource Gray600}" />
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Label Text="School Information" FontAttributes="Bold" FontSize="16" />
+                        <material:TextField Title="School Name *" Text="{Binding SchoolName}" />
+                        <material:TextField Title="School Email *" Text="{Binding Email}" Keyboard="Email" />
+                        <material:TextField Title="Phone" Text="{Binding Phone}" Keyboard="Telephone" />
+                        <material:TextField Title="Address" Text="{Binding Address}" />
+
+                        <Label Text="Admin Account" FontAttributes="Bold" FontSize="16" Margin="0,8,0,0" />
+                        <material:TextField Title="Admin Name" Text="{Binding AdminName}" />
+                        <material:TextField Title="Admin Username" Text="{Binding AdminUsername}" />
+                        <material:TextField Title="Password *" Text="{Binding Password}" IsPassword="True" />
+
+                        <Button Text="Create School Account" Command="{Binding SignupCommand}"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
+                                HeightRequest="52" CornerRadius="18" />
+                    </VerticalStackLayout>
+                </Border>
             </VerticalStackLayout>
         </ScrollView>
-        
-        <!-- Centered Loader -->
-        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#80000000">
-            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
-                <ActivityIndicator IsRunning="{Binding IsBusy}" Color="White" WidthRequest="50" HeightRequest="50"/>
-                <Label Text="Processing..." TextColor="White" FontSize="16" FontAttributes="Bold"/>
+
+        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#66000000">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="12">
+                <ActivityIndicator IsRunning="{Binding IsBusy}" Color="White" WidthRequest="48" HeightRequest="48" />
+                <Label Text="Creating school..." TextColor="White" FontSize="16" FontAttributes="Bold" />
             </VerticalStackLayout>
         </Grid>
     </Grid>

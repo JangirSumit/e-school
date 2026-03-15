@@ -11,7 +11,19 @@ public record TenantSummaryResponse(
     string ContactPersonName,
     string Email,
     string Phone,
+    string Address,
     bool IsActive,
+    string SubscriptionPlan,
+    string BillingCycle,
+    decimal BillingAmount,
+    DateTime SubscriptionStart,
+    DateTime SubscriptionEnd,
+    DateTime? LastBillingDate,
+    DateTime? NextBillingDate,
+    int LicenseSeats,
+    string LicensedModules,
+    string BillingNotes,
+    DateTime CreatedAt,
     int StudentCount,
     int FacultyCount,
     int ClassCount
@@ -72,6 +84,24 @@ public record CreateSchoolRequest(
 );
 
 public record UpdateSchoolStatusRequest(bool IsActive);
+
+public record UpdateSchoolManagementRequest(
+    string ContactPersonName,
+    string Email,
+    string Phone,
+    string Address,
+    bool IsActive,
+    string SubscriptionPlan,
+    string BillingCycle,
+    decimal BillingAmount,
+    DateTime SubscriptionStart,
+    DateTime SubscriptionEnd,
+    DateTime? LastBillingDate,
+    DateTime? NextBillingDate,
+    int LicenseSeats,
+    string LicensedModules,
+    string BillingNotes
+);
 
 public record CreateClassRequest(
     string Name,
