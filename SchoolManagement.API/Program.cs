@@ -53,4 +53,6 @@ app.MapControllers();
 // Health check endpoint
 app.MapGet("/api/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
 
+await DataSeeder.SeedAsync(app.Services, app.Configuration);
+
 app.Run();

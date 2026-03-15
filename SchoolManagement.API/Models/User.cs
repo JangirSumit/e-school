@@ -3,7 +3,7 @@ namespace SchoolManagement.API.Models;
 public class User
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
-    public string TenantId { get; set; } = string.Empty;
+    public string? TenantId { get; set; }
     public string? Username { get; set; } // For staff/students: unique per tenant
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
@@ -12,12 +12,14 @@ public class User
     public UserRole Role { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
-    public Tenant Tenant { get; set; } = null!;
+    public Tenant? Tenant { get; set; }
 }
 
 public enum UserRole
 {
-    Admin,
+    Owner,
+    SchoolAdmin,
     Faculty,
+    Parent,
     Student
 }

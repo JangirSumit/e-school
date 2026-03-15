@@ -24,6 +24,8 @@ public class AuthService : IAuthService
             SessionManager.CurrentTenantId = response.TenantId;
             SessionManager.CurrentUserRole = response.Role;
             SessionManager.CurrentUserName = response.FullName;
+            SessionManager.CurrentSchoolName = response.SchoolName;
+            SessionManager.CurrentSchoolCode = response.SchoolCode;
             SessionManager.AuthToken = response.Token;
 
             _apiService.SetAuthToken(response.Token);
@@ -52,6 +54,7 @@ public class AuthService : IAuthService
                 tenant.Phone,
                 tenant.Address,
                 adminUser.FullName,
+                string.IsNullOrWhiteSpace(adminUser.Username) ? "admin" : adminUser.Username,
                 password
             );
 

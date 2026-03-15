@@ -5,94 +5,215 @@
              x:Class="SchoolManagement.Views.DashboardPage"
              Title="Dashboard"
              BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}">
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="20">
-            <Frame BackgroundColor="{StaticResource Primary}" CornerRadius="15" Padding="20" HasShadow="True">
-                <HorizontalStackLayout Spacing="15">
-                    <Image Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static m:MaterialOutlined.Account_circle}, Size=50, Color=White}" 
-                           HeightRequest="50" WidthRequest="50"/>
-                    <VerticalStackLayout VerticalOptions="Center">
-                        <Label Text="{Binding UserName, StringFormat='Welcome, {0}'}" FontSize="20" FontAttributes="Bold" TextColor="White"/>
-                        <Label Text="School Administrator" FontSize="14" TextColor="White" Opacity="0.8"/>
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="20" Spacing="18">
+                <Frame BackgroundColor="{StaticResource Primary}" CornerRadius="18" Padding="20" HasShadow="True">
+                    <VerticalStackLayout Spacing="8">
+                        <HorizontalStackLayout Spacing="12">
+                            <Image Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static m:MaterialOutlined.Account_circle}, Size=48, Color=White}"
+                                   HeightRequest="48"
+                                   WidthRequest="48" />
+                            <VerticalStackLayout>
+                                <Label Text="{Binding UserName, StringFormat='Welcome, {0}'}" FontSize="22" FontAttributes="Bold" TextColor="White" />
+                                <Label Text="{Binding Role}" FontSize="14" TextColor="White" Opacity="0.9" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+                        <Label Text="{Binding SchoolHeader}" FontSize="16" TextColor="White" />
+                        <Label Text="{Binding SummaryText}" FontSize="14" TextColor="White" Opacity="0.85" />
                     </VerticalStackLayout>
+                </Frame>
+
+                <CollectionView ItemsSource="{Binding Metrics}" SelectionMode="None">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" Span="2" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Margin="0,0,0,10" Padding="14" CornerRadius="16"
+                                   BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="{Binding Label}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+                                    <Label Text="{Binding Value}" FontSize="22" FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+                                    <Label Text="{Binding Hint}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Frame Padding="16" CornerRadius="16"
+                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Recommended actions" FontAttributes="Bold" FontSize="18" />
+                        <CollectionView ItemsSource="{Binding Highlights}" SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <VerticalStackLayout Spacing="2" Margin="0,0,0,10">
+                                        <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Description}" FontSize="13"
+                                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <VerticalStackLayout IsVisible="{Binding IsOwner}" Spacing="12">
+                    <HorizontalStackLayout Spacing="12">
+                        <Button Text="Onboard School" Command="{Binding AddSchoolCommand}" HorizontalOptions="FillAndExpand" />
+                        <Button Text="Enable / Disable" Command="{Binding ToggleSchoolStatusCommand}" HorizontalOptions="FillAndExpand" BackgroundColor="#0F766E" />
+                    </HorizontalStackLayout>
+                    <Label Text="Schools" FontAttributes="Bold" FontSize="18" />
+                    <CollectionView ItemsSource="{Binding Schools}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Margin="0,0,0,10" Padding="16" CornerRadius="16"
+                                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                                    <VerticalStackLayout Spacing="6">
+                                        <Label Text="{Binding SchoolName}" FontAttributes="Bold" FontSize="16" />
+                                        <Label Text="{Binding SchoolCode, StringFormat='Code: {0}'}" />
+                                        <Label Text="{Binding ContactPersonName, StringFormat='Contact: {0}'}" />
+                                        <Label Text="{Binding Email}" />
+                                        <Label Text="{Binding IsActive, StringFormat='Active: {0}'}" />
+                                        <Label Text="{Binding StudentCount, StringFormat='Students: {0}'}" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout IsVisible="{Binding IsSchoolAdmin}" Spacing="12">
+                    <HorizontalStackLayout Spacing="12">
+                        <Button Text="Create Class" Command="{Binding AddClassCommand}" HorizontalOptions="FillAndExpand" />
+                        <Button Text="Add Faculty" Command="{Binding AddFacultyCommand}" HorizontalOptions="FillAndExpand" BackgroundColor="#2563EB" />
+                    </HorizontalStackLayout>
+                    <Button Text="Admit Student + Parent" Command="{Binding AddStudentCommand}" BackgroundColor="#0F766E" />
+
+                    <Label Text="Classes" FontAttributes="Bold" FontSize="18" />
+                    <CollectionView ItemsSource="{Binding Classes}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Margin="0,0,0,10" Padding="16" CornerRadius="16"
+                                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding Name, StringFormat='Class {0}'}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Section, StringFormat='Section: {0}'}" />
+                                        <Label Text="{Binding StudentCount, StringFormat='Students: {0}'}" />
+                                        <Label Text="{Binding Capacity, StringFormat='Capacity: {0}'}" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label Text="Faculty" FontAttributes="Bold" FontSize="18" />
+                    <CollectionView ItemsSource="{Binding FacultyMembers}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Margin="0,0,0,10" Padding="16" CornerRadius="16"
+                                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding FullName}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Username, StringFormat='Username: {0}'}" />
+                                        <Label Text="{Binding Department}" />
+                                        <Label Text="{Binding EmployeeId, StringFormat='Employee ID: {0}'}" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label Text="Students" FontAttributes="Bold" FontSize="18" />
+                    <CollectionView ItemsSource="{Binding Students}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Margin="0,0,0,10" Padding="16" CornerRadius="16"
+                                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding FullName}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Username, StringFormat='Username: {0}'}" />
+                                        <Label Text="{Binding RollNumber, StringFormat='Roll: {0}'}" />
+                                        <Label Text="{Binding Class, StringFormat='Class: {0}'}" />
+                                        <Label Text="{Binding ParentName, StringFormat='Parent: {0}'}" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout IsVisible="{Binding IsFaculty}" Spacing="12">
+                    <Label Text="Assigned / Visible Classes" FontAttributes="Bold" FontSize="18" />
+                    <CollectionView ItemsSource="{Binding Classes}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Margin="0,0,0,10" Padding="16" CornerRadius="16"
+                                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding Name, StringFormat='Class {0}'}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Section, StringFormat='Section: {0}'}" />
+                                        <Label Text="{Binding StudentCount, StringFormat='Students: {0}'}" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label Text="Student Directory" FontAttributes="Bold" FontSize="18" />
+                    <CollectionView ItemsSource="{Binding Students}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Margin="0,0,0,10" Padding="16" CornerRadius="16"
+                                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding FullName}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Class, StringFormat='Class: {0}'}" />
+                                        <Label Text="{Binding Section, StringFormat='Section: {0}'}" />
+                                        <Label Text="{Binding RollNumber, StringFormat='Roll: {0}'}" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout IsVisible="{Binding IsParent}" Spacing="12">
+                    <Label Text="My Children" FontAttributes="Bold" FontSize="18" />
+                    <CollectionView ItemsSource="{Binding Children}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Margin="0,0,0,10" Padding="16" CornerRadius="16"
+                                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding StudentName}" FontAttributes="Bold" />
+                                        <Label Text="{Binding RollNumber, StringFormat='Roll: {0}'}" />
+                                        <Label Text="{Binding ClassName, StringFormat='Class: {0}'}" />
+                                        <Label Text="{Binding Section, StringFormat='Section: {0}'}" />
+                                        <Label Text="{Binding AttendancePercentage, StringFormat='Attendance: {0}%'}" />
+                                        <Label Text="{Binding AverageMarks, StringFormat='Average marks: {0}%'}" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <HorizontalStackLayout Spacing="12">
+                    <Button Text="Refresh" Command="{Binding RefreshCommand}" HorizontalOptions="FillAndExpand" />
+                    <Button Text="Logout" Command="{Binding LogoutCommand}" HorizontalOptions="FillAndExpand" BackgroundColor="#DC2626" />
                 </HorizontalStackLayout>
-            </Frame>
-            
-            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="15" RowSpacing="15" Margin="0,10,0,0">
-                <Frame Grid.Row="0" Grid.Column="0" Padding="0" HasShadow="True" CornerRadius="15" 
-                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
-                    <Button Text="Students" Command="{Binding NavigateToStudentsCommand}" 
-                            BackgroundColor="Transparent" 
-                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" 
-                            HeightRequest="100" CornerRadius="15">
-                        <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.School}" Size="40" 
-                                           Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
-                        </Button.ImageSource>
-                    </Button>
-                </Frame>
-                
-                <Frame Grid.Row="0" Grid.Column="1" Padding="0" HasShadow="True" CornerRadius="15" 
-                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
-                    <Button Text="Faculties" Command="{Binding NavigateToFacultiesCommand}" 
-                            BackgroundColor="Transparent" 
-                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" 
-                            HeightRequest="100" CornerRadius="15">
-                        <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.People}" Size="40" 
-                                           Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
-                        </Button.ImageSource>
-                    </Button>
-                </Frame>
-                
-                <Frame Grid.Row="1" Grid.Column="0" Padding="0" HasShadow="True" CornerRadius="15" 
-                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
-                    <Button Text="Attendance" Command="{Binding NavigateToAttendanceCommand}" 
-                            BackgroundColor="Transparent" 
-                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" 
-                            HeightRequest="100" CornerRadius="15">
-                        <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Check_circle}" Size="40" 
-                                           Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
-                        </Button.ImageSource>
-                    </Button>
-                </Frame>
-                
-                <Frame Grid.Row="1" Grid.Column="1" Padding="0" HasShadow="True" CornerRadius="15" 
-                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
-                    <Button Text="Marks" Command="{Binding NavigateToMarksCommand}" 
-                            BackgroundColor="Transparent" 
-                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" 
-                            HeightRequest="100" CornerRadius="15">
-                        <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Grade}" Size="40" 
-                                           Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
-                        </Button.ImageSource>
-                    </Button>
-                </Frame>
-                
-                <Frame Grid.Row="2" Grid.Column="0" Padding="0" HasShadow="True" CornerRadius="15" 
-                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}">
-                    <Button Text="Holidays" Command="{Binding NavigateToHolidaysCommand}" 
-                            BackgroundColor="Transparent" 
-                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" 
-                            HeightRequest="100" CornerRadius="15">
-                        <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Event}" Size="40" 
-                                           Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
-                        </Button.ImageSource>
-                    </Button>
-                </Frame>
-                
-                <Frame Grid.Row="2" Grid.Column="1" Padding="0" HasShadow="True" CornerRadius="15">
-                    <Button Text="Logout" Command="{Binding LogoutCommand}" BackgroundColor="#EF5350" TextColor="White" 
-                            HeightRequest="100" CornerRadius="15">
-                        <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Logout}" Size="40" Color="White"/>
-                        </Button.ImageSource>
-                    </Button>
-                </Frame>
-            </Grid>
-        </VerticalStackLayout>
-    </ScrollView>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#80000000">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
+                <ActivityIndicator IsRunning="{Binding IsBusy}" Color="White" WidthRequest="50" HeightRequest="50" />
+                <Label Text="Loading dashboard..." TextColor="White" FontSize="16" FontAttributes="Bold" />
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
 </ContentPage>

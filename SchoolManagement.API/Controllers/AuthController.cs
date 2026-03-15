@@ -27,6 +27,7 @@ public class AuthController : ControllerBase
     public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
     {
         User? user = null;
+        Tenant? tenant = null;
         
         // Check if login is schoolcode@username format
         if (request.Email.Contains('@') && !request.Email.Contains('.'))
@@ -37,7 +38,7 @@ public class AuthController : ControllerBase
                 var schoolCode = parts[0].ToUpper();
                 var username = parts[1];
                 
-                var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.SchoolCode == schoolCode);
+                tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.SchoolCode == schoolCode);
                 if (tenant != null)
                 {
                     user = await _context.Users.FirstOrDefaultAsync(u => 
@@ -47,15 +48,32 @@ public class AuthController : ControllerBase
         }
         else
         {
-            // Admin login with email
-            user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email && u.Role == UserRole.Admin);
+            user = await _context.Users
+                .Include(u => u.Tenant)
+                .FirstOrDefaultAsync(u => u.Email == request.Email && u.Role == UserRole.Owner);
+
+            tenant = user?.Tenant;
         }
         
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             return Unauthorized(new { message = "Invalid credentials" });
 
+        if (user.TenantId != null)
+        {
+            tenant ??= await _context.Tenants.FirstOrDefaultAsync(t => t.Id == user.TenantId);
+            if (tenant is null || !tenant.IsActive)
+                return Unauthorized(new { message = "This school is inactive. Please contact the app owner." });
+        }
+
         var token = GenerateJwtToken(user);
-        return Ok(new LoginResponse(token, user.Id, user.TenantId, user.Role.ToString(), user.FullName));
+        return Ok(new LoginResponse(
+            token,
+            user.Id,
+            user.TenantId ?? string.Empty,
+            user.Role.ToString(),
+            user.FullName,
+            user.Role == UserRole.Owner ? "Platform Owner" : tenant?.SchoolName ?? string.Empty,
+            user.Role == UserRole.Owner ? string.Empty : tenant?.SchoolCode ?? string.Empty));
     }
 
     [HttpPost("signup")]
@@ -81,6 +99,7 @@ public class AuthController : ControllerBase
             Email = request.Email,
             Phone = request.Phone,
             Address = request.Address,
+            ContactPersonName = request.AdminName,
             IsActive = true,
             SubscriptionStart = DateTime.UtcNow,
             SubscriptionEnd = DateTime.UtcNow.AddYears(1)
@@ -92,10 +111,11 @@ public class AuthController : ControllerBase
         var user = new User
         {
             TenantId = tenant.Id,
+            Username = string.IsNullOrWhiteSpace(request.AdminUsername) ? "admin" : request.AdminUsername.Trim().ToLowerInvariant(),
             Email = request.Email,
             FullName = request.AdminName,
             Phone = request.Phone,
-            Role = UserRole.Admin,
+            Role = UserRole.SchoolAdmin,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
         };
 
@@ -125,7 +145,7 @@ public class AuthController : ControllerBase
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim("TenantId", user.TenantId),
+            new Claim("TenantId", user.TenantId ?? string.Empty),
             new Claim(ClaimTypes.Role, user.Role.ToString())
         };
 

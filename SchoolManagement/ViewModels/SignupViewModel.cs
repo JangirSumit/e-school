@@ -1,7 +1,6 @@
 using System.Windows.Input;
 using SchoolManagement.Models;
 using SchoolManagement.Services;
-using System.Text.RegularExpressions;
 
 namespace SchoolManagement.ViewModels;
 
@@ -13,6 +12,7 @@ public class SignupViewModel : BaseViewModel
     private string _phone;
     private string _address;
     private string _adminName;
+    private string _adminUsername;
     private string _password;
 
     public string SchoolName { get => _schoolName; set => SetProperty(ref _schoolName, value); }
@@ -20,6 +20,7 @@ public class SignupViewModel : BaseViewModel
     public string Phone { get => _phone; set => SetProperty(ref _phone, value); }
     public string Address { get => _address; set => SetProperty(ref _address, value); }
     public string AdminName { get => _adminName; set => SetProperty(ref _adminName, value); }
+    public string AdminUsername { get => _adminUsername; set => SetProperty(ref _adminUsername, value); }
     public string Password { get => _password; set => SetProperty(ref _password, value); }
 
     public ICommand SignupCommand { get; }
@@ -63,6 +64,11 @@ public class SignupViewModel : BaseViewModel
             return;
         }
 
+        if (string.IsNullOrWhiteSpace(AdminUsername))
+        {
+            AdminUsername = "admin";
+        }
+
         if (Password.Length < 6)
         {
             await Application.Current.MainPage.DisplayAlert("Error", "Password must be at least 6 characters", "OK");
@@ -73,7 +79,7 @@ public class SignupViewModel : BaseViewModel
         try
         {
             var tenant = new Tenant { SchoolName = SchoolName, Email = Email, Phone = Phone, Address = Address };
-            var admin = new User { Email = Email, FullName = AdminName, Phone = Phone };
+            var admin = new User { Username = AdminUsername, Email = Email, FullName = AdminName, Phone = Phone };
             var result = await _authService.SignupSchoolAsync(tenant, admin, Password);
 
             if (result.Success)

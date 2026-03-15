@@ -47,6 +47,12 @@
                         <FontImageSource FontFamily="MaterialRegular" Glyph="{x:Static m:MaterialRegular.Person}" Color="{StaticResource Primary}"/>
                     </material:TextField.Icon>
                 </material:TextField>
+
+                <material:TextField Title="Admin Username" Text="{Binding AdminUsername}">
+                    <material:TextField.Icon>
+                        <FontImageSource FontFamily="MaterialRegular" Glyph="{x:Static m:MaterialRegular.Badge}" Color="{StaticResource Primary}"/>
+                    </material:TextField.Icon>
+                </material:TextField>
                 
                 <material:TextField Title="Password *" Text="{Binding Password}" IsPassword="True">
                     <material:TextField.Icon>

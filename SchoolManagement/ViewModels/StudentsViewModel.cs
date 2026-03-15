@@ -48,7 +48,10 @@ public class StudentsViewModel : BaseViewModel
         if (string.IsNullOrWhiteSpace(fullName)) return;
 
         var email = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Email:", keyboard: Keyboard.Email);
-        if (string.IsNullOrWhiteSpace(email)) return;
+        email ??= string.Empty;
+
+        var username = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Username:");
+        if (string.IsNullOrWhiteSpace(username)) return;
 
         var phone = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Phone:", keyboard: Keyboard.Telephone);
         if (string.IsNullOrWhiteSpace(phone)) return;
@@ -65,8 +68,14 @@ public class StudentsViewModel : BaseViewModel
         var parentName = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Parent Name:");
         if (string.IsNullOrWhiteSpace(parentName)) return;
 
+        var parentUsername = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Parent Username:");
+        if (string.IsNullOrWhiteSpace(parentUsername)) return;
+
         var parentPhone = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Parent Phone:", keyboard: Keyboard.Telephone);
         if (string.IsNullOrWhiteSpace(parentPhone)) return;
+
+        var parentPassword = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Parent Password:");
+        if (string.IsNullOrWhiteSpace(parentPassword)) return;
 
         var password = await Application.Current.MainPage.DisplayPromptAsync("Add Student", "Password:");
         if (string.IsNullOrWhiteSpace(password)) return;
@@ -75,8 +84,8 @@ public class StudentsViewModel : BaseViewModel
         {
             IsBusy = true;
             var request = new CreateStudentRequest(
-                fullName, email, phone, rollNumber, className, section,
-                DateTime.Now.AddYears(-10), parentName, parentPhone, password
+                username, fullName, email, phone, rollNumber, className, section,
+                DateTime.Now.AddYears(-10), parentName, parentUsername, string.Empty, parentPhone, parentPassword, password
             );
 
             var student = await _apiService.CreateStudentAsync(request);

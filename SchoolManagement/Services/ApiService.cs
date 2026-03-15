@@ -9,9 +9,17 @@ public interface IApiService
 {
     Task<LoginResponse?> LoginAsync(LoginRequest request);
     Task<SignupResponse?> SignupAsync(SignupRequest request);
+    Task<DashboardResponse?> GetDashboardAsync();
     Task<List<StudentResponse>> GetStudentsAsync();
     Task<StudentResponse?> CreateStudentAsync(CreateStudentRequest request);
     Task DeleteStudentAsync(string id);
+    Task<List<TenantSummaryResponse>> GetSchoolsAsync();
+    Task<TenantSummaryResponse?> CreateSchoolAsync(CreateSchoolRequest request);
+    Task UpdateSchoolStatusAsync(string id, bool isActive);
+    Task<List<ClassResponse>> GetClassesAsync();
+    Task<ClassResponse?> CreateClassAsync(CreateClassRequest request);
+    Task<List<FacultyResponse>> GetFacultyAsync();
+    Task<FacultyResponse?> CreateFacultyAsync(CreateFacultyRequest request);
     void SetAuthToken(string token);
 }
 
@@ -24,9 +32,9 @@ public class ApiService : IApiService
     {
         var handler = new HttpClientHandler
         {
-            ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+            ServerCertificateCustomValidationCallback = (_, _, _, _) => true
         };
-        
+
 #if ANDROID
         _httpClient = new HttpClient(handler)
         {
@@ -39,7 +47,7 @@ public class ApiService : IApiService
             BaseAddress = new Uri(ApiConfig.BaseUrl)
         };
 #endif
-        
+
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
@@ -57,9 +65,8 @@ public class ApiService : IApiService
         {
             var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request);
             if (!response.IsSuccessStatusCode)
-            {
                 return null;
-            }
+
             return await response.Content.ReadFromJsonAsync<LoginResponse>(_jsonOptions);
         }
         catch (HttpRequestException ex)
@@ -78,10 +85,8 @@ public class ApiService : IApiService
         {
             var response = await _httpClient.PostAsJsonAsync("/api/auth/signup", request);
             if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
                 return new SignupResponse(false, $"Server error: {response.StatusCode}");
-            }
+
             return await response.Content.ReadFromJsonAsync<SignupResponse>(_jsonOptions);
         }
         catch (HttpRequestException ex)
@@ -94,10 +99,11 @@ public class ApiService : IApiService
         }
     }
 
-    public async Task<List<StudentResponse>> GetStudentsAsync()
-    {
-        return await _httpClient.GetFromJsonAsync<List<StudentResponse>>("/api/students", _jsonOptions) ?? new();
-    }
+    public Task<DashboardResponse?> GetDashboardAsync() =>
+        _httpClient.GetFromJsonAsync<DashboardResponse>("/api/management/dashboard", _jsonOptions);
+
+    public Task<List<StudentResponse>> GetStudentsAsync() =>
+        _httpClient.GetFromJsonAsync<List<StudentResponse>>("/api/students", _jsonOptions)!;
 
     public async Task<StudentResponse?> CreateStudentAsync(CreateStudentRequest request)
     {
@@ -110,5 +116,41 @@ public class ApiService : IApiService
     {
         var response = await _httpClient.DeleteAsync($"/api/students/{id}");
         response.EnsureSuccessStatusCode();
+    }
+
+    public Task<List<TenantSummaryResponse>> GetSchoolsAsync() =>
+        _httpClient.GetFromJsonAsync<List<TenantSummaryResponse>>("/api/management/schools", _jsonOptions)!;
+
+    public async Task<TenantSummaryResponse?> CreateSchoolAsync(CreateSchoolRequest request)
+    {
+        var response = await _httpClient.PostAsJsonAsync("/api/management/schools", request);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<TenantSummaryResponse>(_jsonOptions);
+    }
+
+    public async Task UpdateSchoolStatusAsync(string id, bool isActive)
+    {
+        var response = await _httpClient.PutAsJsonAsync($"/api/management/schools/{id}/status", new UpdateSchoolStatusRequest(isActive));
+        response.EnsureSuccessStatusCode();
+    }
+
+    public Task<List<ClassResponse>> GetClassesAsync() =>
+        _httpClient.GetFromJsonAsync<List<ClassResponse>>("/api/management/classes", _jsonOptions)!;
+
+    public async Task<ClassResponse?> CreateClassAsync(CreateClassRequest request)
+    {
+        var response = await _httpClient.PostAsJsonAsync("/api/management/classes", request);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ClassResponse>(_jsonOptions);
+    }
+
+    public Task<List<FacultyResponse>> GetFacultyAsync() =>
+        _httpClient.GetFromJsonAsync<List<FacultyResponse>>("/api/faculties", _jsonOptions)!;
+
+    public async Task<FacultyResponse?> CreateFacultyAsync(CreateFacultyRequest request)
+    {
+        var response = await _httpClient.PostAsJsonAsync("/api/faculties", request);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<FacultyResponse>(_jsonOptions);
     }
 }

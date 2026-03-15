@@ -2,11 +2,13 @@ namespace SchoolManagement.Helpers;
 
 public static class SessionManager
 {
-    public static string CurrentTenantId { get; set; }
-    public static string CurrentUserId { get; set; }
-    public static string CurrentUserRole { get; set; }
-    public static string CurrentUserName { get; set; }
-    public static string AuthToken { get; set; }
+    public static string? CurrentTenantId { get; set; }
+    public static string? CurrentUserId { get; set; }
+    public static string? CurrentUserRole { get; set; }
+    public static string? CurrentUserName { get; set; }
+    public static string? CurrentSchoolName { get; set; }
+    public static string? CurrentSchoolCode { get; set; }
+    public static string? AuthToken { get; set; }
 
     public static bool IsAuthenticated => !string.IsNullOrEmpty(CurrentUserId);
 
@@ -16,6 +18,8 @@ public static class SessionManager
         CurrentUserId = null;
         CurrentUserRole = null;
         CurrentUserName = null;
+        CurrentSchoolName = null;
+        CurrentSchoolCode = null;
         AuthToken = null;
     }
 }

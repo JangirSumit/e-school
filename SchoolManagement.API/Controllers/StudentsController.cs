@@ -64,8 +64,16 @@ public class StudentsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = nameof(UserRole.SchoolAdmin))]
     public async Task<ActionResult<StudentResponse>> Create(CreateStudentRequest request)
     {
+        if (await _context.Users.AnyAsync(u => u.TenantId == TenantId && u.Username == request.ParentUsername))
+        {
+            var existingParent = await _context.Users.FirstAsync(u => u.TenantId == TenantId && u.Username == request.ParentUsername);
+            if (existingParent.Role != UserRole.Parent)
+                return BadRequest(new { message = "Parent username is already used by another role." });
+        }
+
         if (await _context.Users.AnyAsync(u => u.TenantId == TenantId && u.Username == request.Username))
             return BadRequest(new { message = "Username already exists in this school" });
 
@@ -80,13 +88,37 @@ public class StudentsController : ControllerBase
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
         };
 
+        User? parentUser = await _context.Users
+            .FirstOrDefaultAsync(u => u.TenantId == TenantId && u.Username == request.ParentUsername && u.Role == UserRole.Parent);
+
+        if (parentUser == null)
+        {
+            parentUser = new User
+            {
+                TenantId = TenantId,
+                Username = request.ParentUsername,
+                Email = request.ParentEmail,
+                FullName = request.ParentName,
+                Phone = request.ParentPhone,
+                Role = UserRole.Parent,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.ParentPassword)
+            };
+
+            _context.Users.Add(parentUser);
+        }
+
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
+
+        var schoolClass = await _context.Classes
+            .FirstOrDefaultAsync(c => c.TenantId == TenantId && c.Name == request.Class && c.Section == request.Section);
 
         var student = new Student
         {
             TenantId = TenantId,
             UserId = user.Id,
+            ParentUserId = parentUser.Id,
+            ClassId = schoolClass?.Id,
             RollNumber = request.RollNumber,
             Class = request.Class,
             Section = request.Section,
@@ -113,6 +145,7 @@ public class StudentsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = nameof(UserRole.SchoolAdmin))]
     public async Task<IActionResult> Delete(string id)
     {
         var student = await _context.Students.FirstOrDefaultAsync(s => s.Id == id && s.TenantId == TenantId);

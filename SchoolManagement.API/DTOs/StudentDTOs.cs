@@ -10,7 +10,10 @@ public record CreateStudentRequest(
     string Section,
     DateTime DateOfBirth,
     string ParentName,
+    string ParentUsername,
+    string ParentEmail,
     string ParentPhone,
+    string ParentPassword,
     string Password
 );
 
